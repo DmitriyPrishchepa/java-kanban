@@ -1,3 +1,9 @@
+import controllers.TaskManager;
+import model.Epic;
+import model.Subtask;
+import model.Task;
+import util.TaskProgress;
+
 import java.util.Scanner;
 
 public class Main {
@@ -83,74 +89,85 @@ public class Main {
                     );
                     break;
                 case 6:
-                    for (Task task : taskManager.getTasks().values()) {
-                        System.out.println(task.toString());
-                    }
+                    System.out.println(taskManager.getTasks());
                     break;
                 case 7:
-                    for (Epic epic : taskManager.getEpics().values()) {
-                        System.out.println(epic.toString());
-                    }
+                    System.out.println(taskManager.getEpics());
                     break;
                 case 8:
+                    System.out.println(taskManager.getSubtasks());
+                    break;
+                case 9:
                     System.out.println("Введите id эпика, чьи задачи нужно вывести:");
                     int idOfEpic = scanner.nextInt();
                     scanner.nextLine();
-                    for (Subtask subtask : taskManager.getTasksOfEpic(idOfEpic)) {
-                        System.out.println(subtask.toString());
-                    }
+                    taskManager.getSubtasksOfEpic(idOfEpic);
+                    System.out.println(taskManager.getSubtasksOfEpic(idOfEpic));
                     break;
-                case 9:
+                case 10:
                     System.out.println("Введите id задачи, которую вы хотите найти: ");
                     int id = scanner.nextInt();
                     scanner.nextLine();
                     taskManager.getTaskById(id);
+                    System.out.println(taskManager.getTaskById(id));
                     break;
-                case 10:
+                case 11:
+                    System.out.println("Введите id подзадачи: ");
+                    int subId = scanner.nextInt();
+                    taskManager.getSubtaskById(subId);
+                    System.out.println(taskManager.getSubtaskById(subId));
+                    break;
+                case 12:
                     System.out.println("Введите id эпика, который вы хотите найти: ");
                     int findingEpicId = scanner.nextInt();
                     scanner.nextLine();
                     taskManager.getEpicById(findingEpicId);
+                    System.out.println(taskManager.getEpicById(findingEpicId));
                     break;
-                case 11:
+                case 13:
                     System.out.println("Введите id эпика, подзадачу которого вы хотите найти: ");
                     int findEpicId = scanner.nextInt();
                     scanner.nextLine();
                     System.out.println("Введите id подзадачи, которую вы хотите найти: ");
                     int findSubTaskId = scanner.nextInt();
                     scanner.nextLine();
-                    System.out.println(taskManager.getSubtaskOfEpicById(findEpicId, findSubTaskId));
+                    taskManager.getSubtaskInEpicById(findEpicId, findSubTaskId);
+                    System.out.println(taskManager.getSubtaskInEpicById(findEpicId, findSubTaskId));
                     break;
-                case 12:
+                case 14:
                     System.out.println("Введите id задачи, которую вы хотите удалить: ");
                     int removingTaskId = scanner.nextInt();
                     taskManager.removeTaskById(removingTaskId);
                     break;
-                case 13:
+                case 15:
                     System.out.println("Введите id эпика, который вы хотите удалить: ");
                     int removingEpicId = scanner.nextInt();
                     taskManager.removeEpicById(removingEpicId);
                     break;
-                case 14:
+                case 16:
                     System.out.println("Введите id эпика, подзадачу в которм вы хотите удалить ");
                     int removingEpicSubtaskId = scanner.nextInt();
                     System.out.println("Введите id подзадачи, которую вы хотите удалить ");
                     int removingSubtaskId = scanner.nextInt();
                     taskManager.removeSubtaskById(removingEpicSubtaskId, removingSubtaskId);
                     break;
-                case 15:
+                case 17:
                     taskManager.removeAllTasks();
                     break;
-                case 16:
+                case 18:
                     taskManager.removeAllEpics();
                     break;
-                case 17:
+                case 19:
+                    taskManager.removeAllSubtasks();
+                    break;
+                case 20:
                     System.out.println("Вввдите id эпика:");
                     int epicId2 = scanner.nextInt();
                     scanner.nextLine();
                     taskManager.removeAllSubtasksOfEpic(epicId2);
+                    System.out.println(taskManager.removeAllSubtasksOfEpic(epicId2));
                     break;
-                case 18:
+                case 21:
                     System.out.println("Выход из программы");
                     return;
                 default:
@@ -169,16 +186,19 @@ public class Main {
         System.out.println("5 - обновить задачу в эпике");
         System.out.println("6 - вывести список задач");
         System.out.println("7 - вывести список эпиков");
-        System.out.println("8 - вывести список подзадач эпика");
-        System.out.println("9 - найти задачу по id");
-        System.out.println("10 - найти эпик по id");
-        System.out.println("11 - найти подзадачу в эпике по id");
-        System.out.println("12 - удалить задачу по id");
-        System.out.println("13 - удалить эпик по id");
-        System.out.println("14 - удалить подзадачу в эпике по id");
-        System.out.println("15 - удалить все задачи");
-        System.out.println("16 - удалить все эпики");
-        System.out.println("17 - удалить все подзадачи в эпике");
-        System.out.println("18 - выйти из программы");
+        System.out.println("8 - вывести список ВСЕХ подзадач");
+        System.out.println("9 - вывести список подзадач эпика");
+        System.out.println("10 - найти задачу по id");
+        System.out.println("11 - найти подзадачу по id");
+        System.out.println("12 - найти эпик по id");
+        System.out.println("13 - найти подзадачу в эпике по id");
+        System.out.println("14 - удалить задачу по id");
+        System.out.println("15 - удалить эпик по id");
+        System.out.println("16 - удалить подзадачу в эпике по id");
+        System.out.println("17 - удалить все задачи");
+        System.out.println("18 - удалить все эпики");
+        System.out.println("19 - удалить все подзадачи");
+        System.out.println("20 - удалить все подзадачи в эпике");
+        System.out.println("21 - выйти из программы");
     }
 }

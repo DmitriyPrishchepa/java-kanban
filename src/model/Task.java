@@ -1,10 +1,14 @@
+package model;
+
+import util.TaskProgress;
+
 import java.util.Objects;
 
 public class Task {
-    private String name;
-    private String description;
-    private int id;
-    private TaskProgress status;
+    protected String name;
+    protected String description;
+    protected int id;
+    protected TaskProgress status;
 
 
     @Override

@@ -1,24 +1,23 @@
+package model;
+
+import util.TaskProgress;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Epic extends Task {
-    private String name;
-    private String description;
-    private int id;
-    private TaskProgress status;
+
     private int newTaskIdCounter = 0;
 
-    private ArrayList<Subtask> subtasksOfEpic;
+    private final Map<Integer, Subtask> subtasksOfEpic;
 
     public Epic(String name, String description, TaskProgress status) {
         super(name, description, status);
         this.name = name;
         this.description = description;
         this.status = status;
-        subtasksOfEpic = new ArrayList<>();
-    }
-
-    public ArrayList<Subtask> getSubtasksOfEpic() {
-        return subtasksOfEpic;
+        subtasksOfEpic = new HashMap<>();
     }
 
     @Override
@@ -30,25 +29,10 @@ public class Epic extends Task {
                 ", status=" + status +
                 ", subTasks=";
 
-        ArrayList<Task> stringTasks = new ArrayList<>(subtasksOfEpic);
+        ArrayList<Task> stringTasks = new ArrayList<>(subtasksOfEpic.values());
 
         result = result + stringTasks + '}';
         return result;
-    }
-
-    @Override
-    public TaskProgress getStatus() {
-        return status;
-    }
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id) {
-        this.id = id;
     }
 
     public int getNewTaskIdCounter() {
@@ -59,19 +43,24 @@ public class Epic extends Task {
         this.newTaskIdCounter = newTaskIdCounter;
     }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
+    public void addSubtask(Subtask newSubtask) {
+        subtasksOfEpic.put(newSubtask.getId(), newSubtask);
     }
 
-    @Override
-    public void setDescription(String description) {
-        this.description = description;
+    public Map<Integer, Subtask> getSubtasksOfEpic() {
+        return subtasksOfEpic;
     }
 
-    @Override
-    public void setStatus(TaskProgress status) {
-        this.status = status;
+    public void removeSubtaskById(int subtaskId) {
+        if (!subtasksOfEpic.isEmpty()) {
+            subtasksOfEpic.values().removeIf(subtask -> subtask.getId() == subtaskId);
+        }
+    }
+
+    public void removeAllSubtasksOfEpic() {
+        if (!subtasksOfEpic.isEmpty()) {
+            subtasksOfEpic.clear();
+        }
     }
 }
 
