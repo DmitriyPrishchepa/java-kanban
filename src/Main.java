@@ -1,3 +1,6 @@
+import controllers.HistoryManager;
+import controllers.InMemoryHistoryManager;
+import controllers.InMemoryTaskManager;
 import controllers.TaskManager;
 import model.Epic;
 import model.Subtask;
@@ -9,10 +12,83 @@ import java.util.Scanner;
 public class Main {
 
     public static Scanner scanner = new Scanner(System.in);
-    public static TaskManager taskManager = new TaskManager();
+    public static TaskManager taskManager = new InMemoryTaskManager();
+    public static HistoryManager historyManager = new InMemoryHistoryManager();
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
+
+        Task task1 = new Task(
+                "Приготовить обед",
+                "Сегодня мы будем готовить мясо по французски",
+                TaskProgress.NEW
+        );
+
+        Task task2 = new Task(
+                "Позаниматься спортом",
+                "В 6 часов утра планируем пробежку",
+                TaskProgress.NEW
+        );
+
+        Task task3 = new Task(
+                "Учеба на Практикуме",
+                "Изучить материал по тестированию",
+                TaskProgress.NEW
+        );
+
+        Epic epic1 = new Epic(
+                "Новый эпик 1 название",
+                "Новый эпик 1 описание",
+                TaskProgress.NEW
+        );
+
+        Epic epic2 = new Epic(
+                "Новый эпик 2 название",
+                "Новый эпик 2 описание",
+                TaskProgress.NEW
+        );
+
+        Epic epic3 = new Epic(
+                "Новый эпик 3 название",
+                "Новый эпик 3 описание",
+                TaskProgress.NEW
+        );
+
+        Subtask subtask1 = new Subtask(
+                "Помыть посуду",
+                "Сегодня был день рождения, надо перемыть гору посуды",
+                TaskProgress.NEW
+        );
+
+        Subtask subtask2 = new Subtask(
+                "Убрать квартиру",
+                "Сегодня был день рождения, насвинячили и на полу",
+                TaskProgress.NEW
+        );
+
+        Subtask subtask3 = new Subtask(
+                "Лечь спать пораньше",
+                "Маловероятно.",
+                TaskProgress.NEW
+        );
+
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
+        taskManager.addTask(task3);
+
+        taskManager.addEpic(epic1);
+        taskManager.addEpic(epic2);
+        taskManager.addEpic(epic3);
+
+        taskManager.addSubtaskToEpic(epic1.getId(), subtask1);
+        taskManager.addSubtaskToEpic(epic2.getId(), subtask2);
+        taskManager.addSubtaskToEpic(epic3.getId(), subtask3);
+
+        historyManager.addTaskToHistory(task1);
+        historyManager.addTaskToHistory(epic2);
+        historyManager.addTaskToHistory(subtask3);
+
+        printAllTasks(taskManager, historyManager);
 
         while (true) {
             printMenu();
@@ -108,7 +184,6 @@ public class Main {
                     System.out.println("Введите id задачи, которую вы хотите найти: ");
                     int id = scanner.nextInt();
                     scanner.nextLine();
-                    taskManager.getTaskById(id);
                     System.out.println(taskManager.getTaskById(id));
                     break;
                 case 11:
@@ -121,7 +196,6 @@ public class Main {
                     System.out.println("Введите id эпика, который вы хотите найти: ");
                     int findingEpicId = scanner.nextInt();
                     scanner.nextLine();
-                    taskManager.getEpicById(findingEpicId);
                     System.out.println(taskManager.getEpicById(findingEpicId));
                     break;
                 case 13:
@@ -131,7 +205,6 @@ public class Main {
                     System.out.println("Введите id подзадачи, которую вы хотите найти: ");
                     int findSubTaskId = scanner.nextInt();
                     scanner.nextLine();
-                    taskManager.getSubtaskInEpicById(findEpicId, findSubTaskId);
                     System.out.println(taskManager.getSubtaskInEpicById(findEpicId, findSubTaskId));
                     break;
                 case 14:
@@ -168,6 +241,12 @@ public class Main {
                     System.out.println(taskManager.removeAllSubtasksOfEpic(epicId2));
                     break;
                 case 21:
+                    System.out.println(historyManager.getHistory());
+                    break;
+                case 22:
+                    printAllTasks(taskManager, historyManager);
+                    break;
+                case 23:
                     System.out.println("Выход из программы");
                     return;
                 default:
@@ -199,6 +278,34 @@ public class Main {
         System.out.println("18 - удалить все эпики");
         System.out.println("19 - удалить все подзадачи");
         System.out.println("20 - удалить все подзадачи в эпике");
-        System.out.println("21 - выйти из программы");
+        System.out.println("21 - посмотреть просмотренные задачи");
+        System.out.println("22 - проверка сценария");
+        System.out.println("23 - выйти из программы");
+    }
+
+    private static void printAllTasks(TaskManager taskManager, HistoryManager historyManager) {
+        System.out.println("Задачи:");
+        for (Task task : taskManager.getTasks()) {
+            System.out.println(task);
+        }
+        System.out.println("Эпики:");
+        for (Task epic : taskManager.getEpics()) {
+            System.out.println(epic);
+            System.out.println();
+
+            for (Task task : taskManager.getSubtasksOfEpic(epic.getId())) {
+                System.out.println("--> " + task);
+                System.out.println();
+            }
+        }
+        System.out.println("Подзадачи:");
+        for (Task subtask : taskManager.getSubtasks()) {
+            System.out.println(subtask);
+        }
+
+        System.out.println("История:");
+        for (Task task : historyManager.getHistory()) {
+            System.out.println(task);
+        }
     }
 }
