@@ -8,5 +8,5 @@ public interface HistoryManager {
 
     ArrayList<Task> getHistory();
 
-    <T extends Task> void addTaskToHistory(T anyTask);
+    void addTaskToHistory(Task anyTask);
 }

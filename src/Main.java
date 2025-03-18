@@ -1,10 +1,8 @@
-import controllers.HistoryManager;
-import controllers.InMemoryHistoryManager;
-import controllers.InMemoryTaskManager;
 import controllers.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import util.Managers;
 import util.TaskProgress;
 
 import java.util.Scanner;
@@ -12,8 +10,7 @@ import java.util.Scanner;
 public class Main {
 
     public static Scanner scanner = new Scanner(System.in);
-    public static TaskManager taskManager = new InMemoryTaskManager();
-    public static HistoryManager historyManager = new InMemoryHistoryManager();
+    public static TaskManager taskManager = Managers.getDefault();
 
     public static void main(String[] args) {
         System.out.println("Поехали!");
@@ -72,23 +69,23 @@ public class Main {
                 TaskProgress.NEW
         );
 
-        taskManager.addTask(task1);
-        taskManager.addTask(task2);
-        taskManager.addTask(task3);
+//        taskManager.addTask(task1);
+//        taskManager.addTask(task2);
+//        taskManager.addTask(task3);
+//
+//        taskManager.addEpic(epic1);
+//        taskManager.addEpic(epic2);
+//        taskManager.addEpic(epic3);
+//
+//        taskManager.addSubtaskToEpic(epic1.getId(), subtask1);
+//        taskManager.addSubtaskToEpic(epic2.getId(), subtask2);
+//        taskManager.addSubtaskToEpic(epic3.getId(), subtask3);
+//
+//        historyManager.addTaskToHistory(task1);
+//        historyManager.addTaskToHistory(epic2);
+//        historyManager.addTaskToHistory(subtask3);
 
-        taskManager.addEpic(epic1);
-        taskManager.addEpic(epic2);
-        taskManager.addEpic(epic3);
-
-        taskManager.addSubtaskToEpic(epic1.getId(), subtask1);
-        taskManager.addSubtaskToEpic(epic2.getId(), subtask2);
-        taskManager.addSubtaskToEpic(epic3.getId(), subtask3);
-
-        historyManager.addTaskToHistory(task1);
-        historyManager.addTaskToHistory(epic2);
-        historyManager.addTaskToHistory(subtask3);
-
-        printAllTasks(taskManager, historyManager);
+//        printAllTasks(taskManager, historyManager);
 
         while (true) {
             printMenu();
@@ -241,10 +238,10 @@ public class Main {
                     System.out.println(taskManager.removeAllSubtasksOfEpic(epicId2));
                     break;
                 case 21:
-                    System.out.println(historyManager.getHistory());
+                    System.out.println(taskManager.getHistoryList());
                     break;
                 case 22:
-                    printAllTasks(taskManager, historyManager);
+                    printAllTasks(taskManager);
                     break;
                 case 23:
                     System.out.println("Выход из программы");
@@ -278,12 +275,12 @@ public class Main {
         System.out.println("18 - удалить все эпики");
         System.out.println("19 - удалить все подзадачи");
         System.out.println("20 - удалить все подзадачи в эпике");
-        System.out.println("21 - посмотреть просмотренные задачи");
+        System.out.println("21 - посмотреть историю");
         System.out.println("22 - проверка сценария");
         System.out.println("23 - выйти из программы");
     }
 
-    private static void printAllTasks(TaskManager taskManager, HistoryManager historyManager) {
+    private static void printAllTasks(TaskManager taskManager) {
         System.out.println("Задачи:");
         for (Task task : taskManager.getTasks()) {
             System.out.println(task);
@@ -304,7 +301,7 @@ public class Main {
         }
 
         System.out.println("История:");
-        for (Task task : historyManager.getHistory()) {
+        for (Task task : taskManager.getHistoryList()) {
             System.out.println(task);
         }
     }

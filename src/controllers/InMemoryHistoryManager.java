@@ -3,24 +3,26 @@ package controllers;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    public Map<Integer, Task> viewedTasks = new HashMap<>();
-    private static int viewedTasksCounter = 0;
+    private final LinkedList<Task> history = new LinkedList<>();
 
     @Override
     public ArrayList<Task> getHistory() {
-        return new ArrayList<>(viewedTasks.values());
+        return new ArrayList<>(history);
     }
 
     @Override
-    public <T extends Task> void addTaskToHistory(T anyTask) {
-        if (anyTask != null) {
-            viewedTasksCounter++;
-            viewedTasks.put(viewedTasksCounter, anyTask);
+    public void addTaskToHistory(Task anyTask) {
+        if (anyTask == null) {
+            return;
+        }
+
+        history.add(anyTask);
+        if (history.size() > 10) {
+            history.removeFirst();
         }
     }
 }
