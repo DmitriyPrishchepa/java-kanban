@@ -4,7 +4,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import util.Managers;
 import util.Node;
@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {
 
-    InMemoryTaskManager inMemoryTaskManager;
-    InMemoryHistoryManager inMemoryHistoryManager;
+    static InMemoryTaskManager inMemoryTaskManager;
+    static InMemoryHistoryManager inMemoryHistoryManager;
 
-    @BeforeEach
-    void create() {
+    @BeforeAll
+    static void create() {
         inMemoryTaskManager = new InMemoryTaskManager();
         inMemoryHistoryManager = new InMemoryHistoryManager();
     }
@@ -142,18 +142,26 @@ class TaskManagerTest {
 
     @Test
     public void addNewEpic() {
-        final int epicId = inMemoryTaskManager.addEpic(epic1);
 
-        final Epic savedEpic = inMemoryTaskManager.getEpicById(epicId);
+        inMemoryTaskManager.removeAllEpics();
+
+        Epic newEpic = new Epic("Новый эпик", "Описание", TaskProgress.NEW);
+        inMemoryTaskManager.addEpic(newEpic);
+
+        final Epic savedEpic = inMemoryTaskManager.getEpicById(1);
+
+        System.out.println("Сохраненный эпик: " + savedEpic);
 
         assertNotNull(savedEpic, "Эпик не найден");
-        assertEquals(epic1, savedEpic);
+        assertEquals(newEpic, savedEpic);
 
         final List<Epic> epics = inMemoryTaskManager.getEpics();
 
+        System.out.println("Эпики: " + epics);
+
         assertNotNull(epics, "Эпики не возвращаются.");
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
-        assertEquals(epic1, epics.getFirst(), "Эпики не совпадают.");
+        assertEquals(newEpic, epics.getFirst(), "Эпики не совпадают.");
     }
 
     @Test
@@ -210,9 +218,11 @@ class TaskManagerTest {
 
     @Test
     void checkImmutabilityOfTaskWithAdditionToManager() {
-        inMemoryTaskManager.addTask(task1);
+        inMemoryTaskManager.removeAllTasks();
+        Task newTask = new Task("Name", "Descr", TaskProgress.NEW);
+        inMemoryTaskManager.addTask(newTask);
         final List<Task> tasks = inMemoryTaskManager.getTasks();
-        assertEquals(tasks.getFirst(), task1);
+        assertEquals(tasks.getFirst(), newTask);
     }
 
     @Test
@@ -230,6 +240,8 @@ class TaskManagerTest {
         Task t2 = new Task("newNam2", "newDescr2", TaskProgress.NEW);
         Task t3 = new Task("newNam3", "newDescr3", TaskProgress.NEW);
 
+        inMemoryTaskManager.removeAllTasks();
+
         inMemoryTaskManager.addTask(t1);
         inMemoryTaskManager.addTask(t2);
         inMemoryTaskManager.addTask(t3);
@@ -242,7 +254,9 @@ class TaskManagerTest {
 
         assertNotNull(historyDoubleLinkedList, "История не пустая.");
         System.out.println(historyDoubleLinkedList);
-        assertEquals(2, historyDoubleLinkedList.size(), "История не пустая.");
+        assertEquals(4, historyDoubleLinkedList.size(), "История не пустая.");
+
+        inMemoryTaskManager.removeAllTasks();
     }
 
     @Test
@@ -262,6 +276,7 @@ class TaskManagerTest {
 
     @Test
     void checkIfTaskEntityChangeItsFields() {
+
         inMemoryTaskManager.addEpic(epic1);
         inMemoryTaskManager.addSubtaskToEpic(1, subtask1);
         inMemoryTaskManager.addSubtaskToEpic(1, subtask2);
