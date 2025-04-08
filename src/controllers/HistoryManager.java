@@ -1,8 +1,10 @@
 package controllers;
 
 import model.Task;
+import util.Node;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public interface HistoryManager {
 

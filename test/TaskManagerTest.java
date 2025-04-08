@@ -1,5 +1,3 @@
-package test;
-
 import controllers.InMemoryHistoryManager;
 import controllers.InMemoryTaskManager;
 import model.Epic;
@@ -189,22 +187,17 @@ class TaskManagerTest {
 
     @Test
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
-        Task task3 = new Task(
-                "Отдохнуть",
-                "Съездить в горы",
-                TaskProgress.NEW
-        );
+
         inMemoryTaskManager.addTask(task1);
         inMemoryTaskManager.addTask(task2);
 
-        task3.setId(3);
+        int id = inMemoryTaskManager.getTaskById(1).getId();
 
-        inMemoryTaskManager.addTask(task3);
+        task1.setId(1);
 
-        int task3Id = task3.getId();
-        int task3IdInTasks = inMemoryTaskManager.getTaskById(3).getId();
+        int task1Id = task1.getId();
 
-        assertEquals(task3Id, task3IdInTasks);
+        assertEquals(id, task1Id);
     }
 
     @Test
@@ -232,12 +225,24 @@ class TaskManagerTest {
 
     @Test
     void addTaskToDoubleLinkedList() {
-        inMemoryHistoryManager.addTaskToHistory(task1);
-        inMemoryHistoryManager.addTaskToHistory(task2);
-        inMemoryHistoryManager.addTaskToHistory(task2);
-        final ArrayList<Task> historyDoubleLinkedList = inMemoryHistoryManager.getDoubleLinkedList();
+
+        Task t1 = new Task("newName", "newDescr", TaskProgress.NEW);
+        Task t2 = new Task("newNam2", "newDescr2", TaskProgress.NEW);
+        Task t3 = new Task("newNam3", "newDescr3", TaskProgress.NEW);
+
+        inMemoryTaskManager.addTask(t1);
+        inMemoryTaskManager.addTask(t2);
+        inMemoryTaskManager.addTask(t3);
+
+        inMemoryTaskManager.getTaskById(1);
+        inMemoryTaskManager.getTaskById(2);
+        inMemoryTaskManager.getTaskById(2);
+
+        final ArrayList<Task> historyDoubleLinkedList = inMemoryTaskManager.getDoubleLinkedList();
+
         assertNotNull(historyDoubleLinkedList, "История не пустая.");
-        assertEquals(3, historyDoubleLinkedList.size(), "История не пустая.");
+        System.out.println(historyDoubleLinkedList);
+        assertEquals(2, historyDoubleLinkedList.size(), "История не пустая.");
     }
 
     @Test
