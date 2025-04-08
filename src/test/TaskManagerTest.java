@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.Managers;
+import util.Node;
 import util.TaskProgress;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TaskManagerTest {
 
@@ -74,6 +74,12 @@ class TaskManagerTest {
     Task subtask4 = new Subtask(
             "Собеседование",
             "Назначить собеседование",
+            TaskProgress.NEW
+    );
+
+    Subtask subtask5 = new Subtask(
+            "Погулять с ребенком",
+            "Съездить в центр города, сходить в оканариум, поесть в макдональдс",
             TaskProgress.NEW
     );
 
@@ -170,6 +176,17 @@ class TaskManagerTest {
         assertEquals(subtask1, subtasks.getFirst(), "Подзадачи не совпадают.");
     }
 
+    //Удаляемые подзадачи не должны хранить внутри себя старые id.
+    @Test
+    public void checkIfRemovedSubtasksStoreOldIds() {
+        epic1.addSubtask(subtask1);
+        epic1.addSubtask(subtask2);
+        epic1.addSubtask(subtask5);
+
+        Subtask subTaskWithId2 = inMemoryTaskManager.getSubtaskInEpicById(1, 2);
+        assertNull(subTaskWithId2);
+    }
+
     @Test
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
         Task task3 = new Task(
@@ -211,5 +228,49 @@ class TaskManagerTest {
         final ArrayList<Task> history = inMemoryHistoryManager.getHistory();
 
         assertEquals(history.getFirst(), task1);
+    }
+
+    @Test
+    void addTaskToDoubleLinkedList() {
+        inMemoryHistoryManager.addTaskToHistory(task1);
+        inMemoryHistoryManager.addTaskToHistory(task2);
+        inMemoryHistoryManager.addTaskToHistory(task2);
+        final ArrayList<Task> historyDoubleLinkedList = inMemoryHistoryManager.getDoubleLinkedList();
+        assertNotNull(historyDoubleLinkedList, "История не пустая.");
+        assertEquals(3, historyDoubleLinkedList.size(), "История не пустая.");
+    }
+
+    @Test
+    void removeTaskNodeFromHistory() {
+        inMemoryHistoryManager.addTaskToHistory(task1);
+        inMemoryHistoryManager.addTaskToHistory(task2);
+
+        final ArrayList<Task> history = inMemoryHistoryManager.getHistory();
+
+        Node<Task> testNode = new Node<>(null, task1, null);
+
+        inMemoryHistoryManager.removeNode(testNode);
+
+        assertNotNull(history, "История не пустая.");
+        assertEquals(1, history.size(), "История не пустая.");
+    }
+
+    @Test
+    void checkIfTaskEntityChangeItsFields() {
+        inMemoryTaskManager.addEpic(epic1);
+        inMemoryTaskManager.addSubtaskToEpic(1, subtask1);
+        inMemoryTaskManager.addSubtaskToEpic(1, subtask2);
+        inMemoryTaskManager.addSubtaskToEpic(1, subtask5);
+
+
+        ArrayList<Subtask> subtasksOfEpic1 = inMemoryTaskManager.getSubtasksOfEpic(1);
+
+        Subtask subtask1InEpicCopy = subtasksOfEpic1.get(1);
+        subtask1InEpicCopy.setName("new");
+
+        System.out.println("Копия " + subtask1InEpicCopy);
+        System.out.println("Оригинал " + subtask1);
+
+        assertNotEquals(subtask1InEpicCopy, subtask1);
     }
 }

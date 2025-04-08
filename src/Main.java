@@ -241,9 +241,12 @@ public class Main {
                     System.out.println(taskManager.getHistoryList());
                     break;
                 case 22:
-                    printAllTasks(taskManager);
+                    System.out.println(taskManager.getDoubleLinkedList());
                     break;
                 case 23:
+                    printAllTasks(taskManager);
+                    break;
+                case 24:
                     System.out.println("Выход из программы");
                     return;
                 default:
@@ -276,8 +279,10 @@ public class Main {
         System.out.println("19 - удалить все подзадачи");
         System.out.println("20 - удалить все подзадачи в эпике");
         System.out.println("21 - посмотреть историю");
-        System.out.println("22 - проверка сценария");
-        System.out.println("23 - выйти из программы");
+        //тестовый
+        System.out.println("22 - посмотреть linkedList");
+        System.out.println("23 - проверка сценария");
+        System.out.println("24 - выйти из программы");
     }
 
     private static void printAllTasks(TaskManager taskManager) {
