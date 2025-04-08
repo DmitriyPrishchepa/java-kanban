@@ -226,8 +226,8 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
                     }
                 }
 
-                if (epic.getSubtasksOfEpic().values().stream().
-                        allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
+                if (epic.getSubtasksOfEpic().values().stream()
+                        .allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
                     epic.setStatus(TaskProgress.NEW);
                 } else if (epic.getSubtasksOfEpic().values().stream()
                         .allMatch(task -> task.getStatus().equals(TaskProgress.DONE))) {
