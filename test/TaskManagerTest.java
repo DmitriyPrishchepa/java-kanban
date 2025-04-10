@@ -266,7 +266,7 @@ class TaskManagerTest {
 
         final ArrayList<Task> history = inMemoryHistoryManager.getHistory();
 
-        Node<Task> testNode = new Node<>(null, task1, null);
+        Node testNode = new Node(null, task1, null);
 
         inMemoryHistoryManager.removeNode(testNode);
 
