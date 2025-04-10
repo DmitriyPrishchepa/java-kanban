@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import util.Managers;
-import util.Node;
 import util.TaskProgress;
+import controllers.InMemoryHistoryManager.Node;
 
 import java.util.ArrayList;
 import java.util.List;

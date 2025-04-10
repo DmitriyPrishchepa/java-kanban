@@ -1,32 +1,53 @@
 package controllers;
 
 import model.Task;
-import util.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
+    private Node<Task> head;
+    private Node<Task> tail;
+
     private final HashMap<Integer, Node<Task>> history = new HashMap<>();
-    private final HistoryDoublyLinkedList<Task> doubleLinkedList = new HistoryDoublyLinkedList<>();
+    private final ArrayList<Task> historyLinkedList = new ArrayList<>();
+
+    public void linkLast(Task element) {
+        final Node<Task> oldTail = tail;
+        final Node<Task> newNode = new Node<>(oldTail, element, null);
+        tail = newNode;
+        if (oldTail == null) {
+            head = newNode;
+        } else {
+            oldTail.next = newNode;
+        }
+        historyLinkedList.add(tail.data);
+    }
+
+    public ArrayList<Task> getTasks() {
+        return historyLinkedList;
+    }
 
     @Override
     public ArrayList<Task> getHistory() {
         ArrayList<Task> historyList = new ArrayList<>();
-        if (!history.isEmpty()) {
-            for (Node<Task> node : history.values()) {
-                historyList.add(node.data);
-            }
-            return historyList;
+
+        Node<Task> first = head;
+
+        while (first != null) {
+            historyList.add(first.data);
+            first = first.next;
         }
-        return new ArrayList<>();
+
+        return historyList;
     }
 
     @Override
     //метод для теста
     public ArrayList<Task> getDoubleLinkedList() {
-        return doubleLinkedList.getTasks();
+        return getTasks();
     }
 
     @Override
@@ -37,8 +58,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         if (history.isEmpty()) {
             Node<Task> newNode = new Node<>(null, anyTask, null);
-            System.out.println("id" + anyTask.getId());
-            doubleLinkedList.linkLast(newNode.data);
+            linkLast(newNode.data);
             history.put(anyTask.getId(), newNode);
         } else {
             Node<Task> searchNode = history.getOrDefault(anyTask.getId(), null);
@@ -46,7 +66,7 @@ public class InMemoryHistoryManager implements HistoryManager {
                 removeNode(searchNode);
                 history.put(anyTask.getId(), new Node<>(null, anyTask, null));
             } else {
-                doubleLinkedList.linkLast(anyTask);
+                linkLast(anyTask);
                 history.put(anyTask.getId(), new Node<>(null, anyTask, null));
             }
         }
@@ -61,28 +81,49 @@ public class InMemoryHistoryManager implements HistoryManager {
         history.values().removeIf(taskNode -> taskNode.equals(node));
     }
 
-    public static class HistoryDoublyLinkedList<T> {
-        private Node<T> head;
-        private Node<T> tail;
-        private int size = 0;
+    public static class Node<Task> {
+        public Task data;
+        public Node<Task> prev;
+        public Node<Task> next;
 
-        private final ArrayList<T> list = new ArrayList<>();
-
-        public void linkLast(T element) {
-            final Node<T> oldTail = tail;
-            final Node<T> newNode = new Node<>(oldTail, element, null);
-            tail = newNode;
-            if (oldTail == null) {
-                head = newNode;
-            } else {
-                oldTail.next = newNode;
-            }
-            list.add(tail.data);
-            size++;
+        public Node(Node<Task> prev, Task data, Node<Task> next) {
+            this.data = data;
+            this.prev = prev;
+            this.next = next;
         }
 
-        public ArrayList<T> getTasks() {
-            return list;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node<?> node = (Node<?>) o;
+            return Objects.equals(data, node.data) && Objects.equals(prev, node.prev) && Objects.equals(next, node.next);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 17;
+
+            if (data != null) {
+                hash = hash + data.hashCode();
+            }
+
+            hash = hash * 31;
+
+            if (prev != null) {
+                hash = hash + prev.hashCode();
+            }
+
+            hash = hash * 31;
+
+            if (next != null) {
+                hash = hash + next.hashCode();
+            }
+
+            hash = hash * 31;
+
+            return hash;
         }
     }
+
 }
