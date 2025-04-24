@@ -53,6 +53,9 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void removeAllTasks() {
         if (!tasks.isEmpty()) {
+            for (Task task : tasks.values()) {
+                remove(task.getId());
+            }
             taskIdCounter = 0;
             tasks.clear();
         }
@@ -61,6 +64,9 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void removeAllEpics() {
         if (!epics.isEmpty()) {
+            for (Epic epic : epics.values()) {
+                remove(epic.getId());
+            }
             epicIdCounter = 0;
             epics.clear();
             subtasks.clear();
@@ -85,6 +91,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
         Epic neededEpic = getEpicById(epicId);
 
         for (Subtask subtaskInEpic : neededEpic.getSubtasksOfEpic().values()) {
+            remove(subtaskInEpic.getId());
             subtasks.values().removeIf(subtask -> subtask.equals(subtaskInEpic));
         }
 
@@ -219,8 +226,8 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
                     }
                 }
 
-                if (epic.getSubtasksOfEpic().values().stream().
-                        allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
+                if (epic.getSubtasksOfEpic().values().stream()
+                        .allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
                     epic.setStatus(TaskProgress.NEW);
                 } else if (epic.getSubtasksOfEpic().values().stream()
                         .allMatch(task -> task.getStatus().equals(TaskProgress.DONE))) {
@@ -241,6 +248,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     public void removeTaskById(int taskId) {
         if (!tasks.isEmpty()) {
             tasks.remove(taskId);
+            remove(taskId);
         }
     }
 
@@ -248,6 +256,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     public void removeEpicById(int epicId) {
         if (!epics.isEmpty()) {
             epics.remove(epicId);
+            remove(epicId);
         }
     }
 
@@ -260,23 +269,9 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
                 Subtask subtaskInEpic = getSubtaskInEpicById(epicId, subtaskId);
 
                 subtasks.values().removeIf(subtask -> subtask.equals(subtaskInEpic));
-
-                subTaskIdCounter = 0;
-
-                for (Integer key : subtasks.keySet()) {
-                    subTaskIdCounter++;
-                    subtasks.put(subTaskIdCounter, subtasks.get(key));
-                }
+                remove(subtaskId);
 
                 epic.removeSubtaskById(subtaskId);
-                epic.setNewTaskIdCounter(0);
-                int counter = epic.getNewTaskIdCounter();
-
-                for (Subtask subtaskInEpic2 : epic.getSubtasksOfEpic().values()) {
-                    counter++;
-                    epic.setNewTaskIdCounter(counter);
-                    subtaskInEpic2.setId(epic.getNewTaskIdCounter());
-                }
             }
         }
     }
@@ -289,5 +284,15 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void addTaskToHistory(Task anyTask) {
         historyManager.addTaskToHistory(anyTask);
+    }
+
+    @Override
+    public void remove(int id) {
+        historyManager.remove(id);
+    }
+
+    @Override
+    public ArrayList<Task> getDoubleLinkedList() {
+        return historyManager.getDoubleLinkedList();
     }
 }

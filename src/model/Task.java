@@ -82,9 +82,13 @@ public class Task {
             hash = hash + description.hashCode();
         }
 
+        hash = hash * 31;
+
         if (status != null) {
             hash = hash + status.hashCode();
         }
+
+        hash = hash * 31;
 
         return hash;
     }
