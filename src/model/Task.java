@@ -13,7 +13,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
+        return "Epic{" +
                 "name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", id=" + id +

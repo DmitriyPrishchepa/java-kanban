@@ -169,6 +169,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
             newId = newId + 1;
             epic.setNewTaskIdCounter(newId);
             newSubtask.setId(epic.getNewTaskIdCounter());
+            newSubtask.setEpicId(epicId);
 
             epic.addSubtask(newSubtask);
 
