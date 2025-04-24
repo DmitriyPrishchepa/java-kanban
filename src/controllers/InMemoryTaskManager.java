@@ -169,6 +169,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
             newId = newId + 1;
             epic.setNewTaskIdCounter(newId);
             newSubtask.setId(epic.getNewTaskIdCounter());
+            newSubtask.setEpicId(epicId);
 
             epic.addSubtask(newSubtask);
 
@@ -219,8 +220,8 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
                     }
                 }
 
-                if (epic.getSubtasksOfEpic().values().stream().
-                        allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
+                if (epic.getSubtasksOfEpic().values().stream()
+                        .allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
                     epic.setStatus(TaskProgress.NEW);
                 } else if (epic.getSubtasksOfEpic().values().stream()
                         .allMatch(task -> task.getStatus().equals(TaskProgress.DONE))) {

@@ -1,5 +1,3 @@
-package test;
-
 import controllers.InMemoryHistoryManager;
 import controllers.InMemoryTaskManager;
 import model.Epic;
@@ -180,12 +178,14 @@ class TaskManagerTest {
         inMemoryTaskManager.addTask(task1);
         inMemoryTaskManager.addTask(task2);
 
-        task3.setId(3);
-
         inMemoryTaskManager.addTask(task3);
 
+        task3.setId(3);
+
         int task3Id = task3.getId();
+        System.out.println(task3Id);
         int task3IdInTasks = inMemoryTaskManager.getTaskById(3).getId();
+        System.out.println(task3IdInTasks);
 
         assertEquals(task3Id, task3IdInTasks);
     }
