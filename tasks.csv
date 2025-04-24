@@ -1,3 +1,4 @@
 id,type,name,status,description,epic
-1,TASK,name,NEW,descr
-2,TASK,name2,NEW,descr2
+1,TASK,run,NEW,run
+2,TASK,cook,NEW,cook
+3,TASK,swim,NEW,swim

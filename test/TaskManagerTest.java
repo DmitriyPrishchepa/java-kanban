@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import util.Managers;
 import util.TaskProgress;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TaskManagerTest {
 
-    InMemoryTaskManager inMemoryTaskManager;
+    InMemoryTaskManager taskManager;
     InMemoryHistoryManager inMemoryHistoryManager;
-
+    
     @BeforeEach
     void create() {
-        inMemoryTaskManager = new InMemoryTaskManager();
+        taskManager = new InMemoryTaskManager();
         inMemoryHistoryManager = new InMemoryHistoryManager();
     }
 
@@ -120,14 +121,14 @@ class TaskManagerTest {
 
     @Test
     public void addNewTask() {
-        final int taskId = inMemoryTaskManager.addTask(task1);
+        final int taskId = taskManager.addTask(task1);
 
-        final Task savedTask = inMemoryTaskManager.getTaskById(taskId);
+        final Task savedTask = taskManager.getTaskById(taskId);
 
         assertNotNull(savedTask, "Задача не найдена");
         assertEquals(task1, savedTask);
 
-        final List<Task> tasks = inMemoryTaskManager.getTasks();
+        final List<Task> tasks = taskManager.getTasks();
 
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
@@ -136,14 +137,14 @@ class TaskManagerTest {
 
     @Test
     public void addNewEpic() {
-        final int epicId = inMemoryTaskManager.addEpic(epic1);
+        final int epicId = taskManager.addEpic(epic1);
 
-        final Epic savedEpic = inMemoryTaskManager.getEpicById(epicId);
+        final Epic savedEpic = taskManager.getEpicById(epicId);
 
         assertNotNull(savedEpic, "Эпик не найден");
         assertEquals(epic1, savedEpic);
 
-        final List<Epic> epics = inMemoryTaskManager.getEpics();
+        final List<Epic> epics = taskManager.getEpics();
 
         assertNotNull(epics, "Эпики не возвращаются.");
         assertEquals(1, epics.size(), "Неверное количество эпиков.");
@@ -153,15 +154,15 @@ class TaskManagerTest {
     @Test
     public void addNewSubtask() {
 
-        final int epicId = inMemoryTaskManager.addEpic(epic1);
-        final int subtaskId = inMemoryTaskManager.addSubtaskToEpic(epicId, subtask1);
+        final int epicId = taskManager.addEpic(epic1);
+        final int subtaskId = taskManager.addSubtaskToEpic(epicId, subtask1);
 
-        final Subtask savedSubtask = inMemoryTaskManager.getSubtaskInEpicById(epic1.getId(), subtaskId);
+        final Subtask savedSubtask = taskManager.getSubtaskInEpicById(epic1.getId(), subtaskId);
 
         assertNotNull(savedSubtask, "Подзадача не найдена");
         assertEquals(subtask1, savedSubtask);
 
-        final List<Subtask> subtasks = inMemoryTaskManager.getSubtasksOfEpic(epic1.getId());
+        final List<Subtask> subtasks = taskManager.getSubtasksOfEpic(epic1.getId());
 
         assertNotNull(subtasks, "Подзадачи не возвращаются.");
         assertEquals(1, subtasks.size(), "Неверное количество подзадач.");
@@ -175,16 +176,16 @@ class TaskManagerTest {
                 "Съездить в горы",
                 TaskProgress.NEW
         );
-        inMemoryTaskManager.addTask(task1);
-        inMemoryTaskManager.addTask(task2);
+        taskManager.addTask(task1);
+        taskManager.addTask(task2);
 
-        inMemoryTaskManager.addTask(task3);
+        taskManager.addTask(task3);
 
         task3.setId(3);
 
         int task3Id = task3.getId();
         System.out.println(task3Id);
-        int task3IdInTasks = inMemoryTaskManager.getTaskById(3).getId();
+        int task3IdInTasks = taskManager.getTaskById(3).getId();
         System.out.println(task3IdInTasks);
 
         assertEquals(task3Id, task3IdInTasks);
@@ -200,8 +201,8 @@ class TaskManagerTest {
 
     @Test
     void checkImmutabilityOfTaskWithAdditionToManager() {
-        inMemoryTaskManager.addTask(task1);
-        final List<Task> tasks = inMemoryTaskManager.getTasks();
+        taskManager.addTask(task1);
+        final List<Task> tasks = taskManager.getTasks();
         assertEquals(tasks.getFirst(), task1);
     }
 

@@ -1,9 +1,7 @@
-import controllers.TaskManager;
+import controllers.FileBackedTaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import util.FileBackedTaskManager;
-import util.Managers;
 import util.TaskProgress;
 
 import java.io.IOException;
@@ -17,7 +15,6 @@ public class Main {
     static final Path path = Paths.get("C://Users//Дмитрий//javaKanban//java-kanban//tasks.csv");
 
     public static Scanner scanner = new Scanner(System.in);
-    public static TaskManager taskManager = Managers.getDefault();
 
     public static FileBackedTaskManager fileBackedTaskManager;
 
@@ -48,7 +45,7 @@ public class Main {
                     String taskName = scanner.nextLine();
                     System.out.println("Введите описание задачи:");
                     String taskDescription = scanner.nextLine();
-                    taskManager.addTask(new Task(taskName, taskDescription, TaskProgress.NEW));
+                    fileBackedTaskManager.addTask(new Task(taskName, taskDescription, TaskProgress.NEW));
                     break;
                 case 2:
                     System.out.println("Чтобы создать Эпик, нужно ввести данные:");
@@ -56,7 +53,7 @@ public class Main {
                     String epicName = scanner.nextLine();
                     System.out.println("Введите описание эпика:");
                     String epicDescription = scanner.nextLine();
-                    taskManager.addEpic(new Epic(epicName, epicDescription, TaskProgress.NEW));
+                    fileBackedTaskManager.addEpic(new Epic(epicName, epicDescription, TaskProgress.NEW));
                     break;
                 case 3:
                     System.out.println("Введите id эпика, в который хотите добавить задачу:");
@@ -66,7 +63,7 @@ public class Main {
                     String subTaskName = scanner.nextLine();
                     System.out.println("Введите описание подзадачи");
                     String subTaskDescription = scanner.nextLine();
-                    taskManager.addSubtaskToEpic(epicId, new Subtask(subTaskName, subTaskDescription, TaskProgress.NEW));
+                    fileBackedTaskManager.addSubtaskToEpic(epicId, new Subtask(subTaskName, subTaskDescription, TaskProgress.NEW));
                     break;
                 case 4:
                     System.out.println("Чтобы обновить задачу, нужно ввести данные:");
@@ -79,7 +76,7 @@ public class Main {
                     String updatedDescription = scanner.nextLine();
                     System.out.println("Введите новый статус задачи:");
                     String updatedStatus = scanner.nextLine();
-                    taskManager.updateTask(neededId,
+                    fileBackedTaskManager.updateTask(neededId,
                             new Task(updatedName,
                                     updatedDescription,
                                     TaskProgress.valueOf(updatedStatus)
@@ -100,7 +97,7 @@ public class Main {
                     String updatedSubtaskDescription = scanner.nextLine();
                     System.out.println("Введите новый статус задачи:");
                     String updatedSubtaskStatus = scanner.nextLine();
-                    taskManager.updateSubtask(
+                    fileBackedTaskManager.updateSubtask(
                             neededEpicId,
                             neededSubtaskId,
                             new Subtask(updatedSubTaskName,
@@ -110,38 +107,38 @@ public class Main {
                     );
                     break;
                 case 6:
-                    System.out.println(taskManager.getTasks());
+                    System.out.println(fileBackedTaskManager.getTasks());
                     break;
                 case 7:
-                    System.out.println(taskManager.getEpics());
+                    System.out.println(fileBackedTaskManager.getEpics());
                     break;
                 case 8:
-                    System.out.println(taskManager.getSubtasks());
+                    System.out.println(fileBackedTaskManager.getSubtasks());
                     break;
                 case 9:
                     System.out.println("Введите id эпика, чьи задачи нужно вывести:");
                     int idOfEpic = scanner.nextInt();
                     scanner.nextLine();
-                    taskManager.getSubtasksOfEpic(idOfEpic);
-                    System.out.println(taskManager.getSubtasksOfEpic(idOfEpic));
+                    fileBackedTaskManager.getSubtasksOfEpic(idOfEpic);
+                    System.out.println(fileBackedTaskManager.getSubtasksOfEpic(idOfEpic));
                     break;
                 case 10:
                     System.out.println("Введите id задачи, которую вы хотите найти: ");
                     int id = scanner.nextInt();
                     scanner.nextLine();
-                    System.out.println(taskManager.getTaskById(id));
+                    System.out.println(fileBackedTaskManager.getTaskById(id));
                     break;
                 case 11:
                     System.out.println("Введите id подзадачи: ");
                     int subId = scanner.nextInt();
-                    taskManager.getSubtaskById(subId);
-                    System.out.println(taskManager.getSubtaskById(subId));
+                    fileBackedTaskManager.getSubtaskById(subId);
+                    System.out.println(fileBackedTaskManager.getSubtaskById(subId));
                     break;
                 case 12:
                     System.out.println("Введите id эпика, который вы хотите найти: ");
                     int findingEpicId = scanner.nextInt();
                     scanner.nextLine();
-                    System.out.println(taskManager.getEpicById(findingEpicId));
+                    System.out.println(fileBackedTaskManager.getEpicById(findingEpicId));
                     break;
                 case 13:
                     System.out.println("Введите id эпика, подзадачу которого вы хотите найти: ");
@@ -150,43 +147,43 @@ public class Main {
                     System.out.println("Введите id подзадачи, которую вы хотите найти: ");
                     int findSubTaskId = scanner.nextInt();
                     scanner.nextLine();
-                    System.out.println(taskManager.getSubtaskInEpicById(findEpicId, findSubTaskId));
+                    System.out.println(fileBackedTaskManager.getSubtaskInEpicById(findEpicId, findSubTaskId));
                     break;
                 case 14:
                     System.out.println("Введите id задачи, которую вы хотите удалить: ");
                     int removingTaskId = scanner.nextInt();
-                    taskManager.removeTaskById(removingTaskId);
+                    fileBackedTaskManager.removeTaskById(removingTaskId);
                     break;
                 case 15:
                     System.out.println("Введите id эпика, который вы хотите удалить: ");
                     int removingEpicId = scanner.nextInt();
-                    taskManager.removeEpicById(removingEpicId);
+                    fileBackedTaskManager.removeEpicById(removingEpicId);
                     break;
                 case 16:
                     System.out.println("Введите id эпика, подзадачу в которм вы хотите удалить ");
                     int removingEpicSubtaskId = scanner.nextInt();
                     System.out.println("Введите id подзадачи, которую вы хотите удалить ");
                     int removingSubtaskId = scanner.nextInt();
-                    taskManager.removeSubtaskById(removingEpicSubtaskId, removingSubtaskId);
+                    fileBackedTaskManager.removeSubtaskById(removingEpicSubtaskId, removingSubtaskId);
                     break;
                 case 17:
-                    taskManager.removeAllTasks();
+                    fileBackedTaskManager.removeAllTasks();
                     break;
                 case 18:
-                    taskManager.removeAllEpics();
+                    fileBackedTaskManager.removeAllEpics();
                     break;
                 case 19:
-                    taskManager.removeAllSubtasks();
+                    fileBackedTaskManager.removeAllSubtasks();
                     break;
                 case 20:
                     System.out.println("Вввдите id эпика:");
                     int epicId2 = scanner.nextInt();
                     scanner.nextLine();
-                    taskManager.removeAllSubtasksOfEpic(epicId2);
-                    System.out.println(taskManager.removeAllSubtasksOfEpic(epicId2));
+                    fileBackedTaskManager.removeAllSubtasksOfEpic(epicId2);
+                    System.out.println(fileBackedTaskManager.removeAllSubtasksOfEpic(epicId2));
                     break;
                 case 21:
-                    System.out.println(taskManager.getHistoryList());
+                    System.out.println(fileBackedTaskManager.getHistoryList());
                     break;
                 case 22:
                     System.out.println("Выход из программы");
@@ -224,28 +221,28 @@ public class Main {
         System.out.println("22 - выйти из программы");
     }
 
-//    private static void printAllTasks(taskManager taskManager) {
+//    private static void printAllTasks(fileBackedTaskManager fileBackedTaskManager) {
 //        System.out.println("Задачи:");
-//        for (Task task : taskManager.getTasks()) {
+//        for (Task task : fileBackedTaskManager.getTasks()) {
 //            System.out.println(task);
 //        }
 //        System.out.println("Эпики:");
-//        for (Task epic : taskManager.getEpics()) {
+//        for (Task epic : fileBackedTaskManager.getEpics()) {
 //            System.out.println(epic);
 //            System.out.println();
 //
-//            for (Task task : taskManager.getSubtasksOfEpic(epic.getId())) {
+//            for (Task task : fileBackedTaskManager.getSubtasksOfEpic(epic.getId())) {
 //                System.out.println("--> " + task);
 //                System.out.println();
 //            }
 //        }
 //        System.out.println("Подзадачи:");
-//        for (Task subtask : taskManager.getSubtasks()) {
+//        for (Task subtask : fileBackedTaskManager.getSubtasks()) {
 //            System.out.println(subtask);
 //        }
 //
 //        System.out.println("История:");
-//        for (Task task : taskManager.getHistoryList()) {
+//        for (Task task : fileBackedTaskManager.getHistoryList()) {
 //            System.out.println(task);
 //        }
 //    }
