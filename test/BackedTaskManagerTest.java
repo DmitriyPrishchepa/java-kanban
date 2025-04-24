@@ -1,3 +1,4 @@
+import exceptions.ManagerSaveException;
 import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +32,15 @@ public class BackedTaskManagerTest {
     }
 
     @Test
-    void shouldSaveSeveralTasks() throws IOException {
+    void shouldSaveSeveralTasks() {
 
-        String stringValue = Files.readString(path);
+        String stringValue;
+
+        try {
+            stringValue = Files.readString(path);
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка записи в файл", e);
+        }
 
         System.out.println(stringValue);
 
