@@ -179,11 +179,9 @@ public class TaskManagerTest {
 
         task2.setId(2);
 
-        Task taskWithSetId = task2;
-
         System.out.println("Задачи: " + taskManager.getTasks());
 
-        assertEquals(taskWithSetId, taskWithGeneratedId);
+        assertEquals(taskWithGeneratedId, task2);
     }
 
     @Test
