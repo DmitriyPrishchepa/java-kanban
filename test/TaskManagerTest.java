@@ -184,6 +184,9 @@ public class TaskManagerTest {
         int task3Id = task3.getId();
         System.out.println(task3Id);
         int task3IdInTasks = taskManager.getTaskById(3).getId();
+
+        assertNotNull(taskManager.getTaskById(3));
+
         System.out.println(task3IdInTasks);
 
         assertEquals(task3Id, task3IdInTasks);
