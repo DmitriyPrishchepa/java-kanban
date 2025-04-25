@@ -178,11 +178,11 @@ public class TaskManagerTest {
         Task taskWithGeneratedId = taskManager.getTaskById(2);
         int genId = taskWithGeneratedId.getId();
 
-        task2.setId(2);
+        task3.setId(2);
 
         System.out.println("Задачи: " + taskManager.getTasks());
 
-        assertEquals(genId, task2.getId());
+        assertEquals(genId, task3.getId());
     }
 
     @Test
