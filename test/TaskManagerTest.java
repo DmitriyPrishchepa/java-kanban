@@ -37,6 +37,8 @@ public class TaskManagerTest {
             TaskProgress.NEW
     );
 
+    Task task3 = new Task("Name", "Descr", TaskProgress.NEW);
+
     Epic epic1 = new Epic(
             "Отпуск",
             "Планы на отпуск",
@@ -169,27 +171,26 @@ public class TaskManagerTest {
 
     @Test
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
-        Task task3 = new Task(
-                "Отдохнуть",
-                "Съездить в горы",
-                TaskProgress.NEW
-        );
+
         taskManager.addTask(task1);
-        taskManager.addTask(task2);
 
-        taskManager.addTask(task3);
+        System.out.println("Задачи: " + taskManager.getTasks());
 
-        task3.setId(3);
+        task1.setId(2);
 
-        int task3Id = task3.getId();
-        System.out.println(task3Id);
-        int task3IdInTasks = taskManager.getTaskById(3).getId();
+        int task1Id = task1.getId();
 
-        assertNotNull(taskManager.getTaskById(3));
+        System.out.println("id первой задачи: " + task1Id);
 
-        System.out.println(task3IdInTasks);
+        int task1IdInTasks = taskManager.getTaskById(2).getId();
 
-        assertEquals(task3Id, task3IdInTasks);
+        System.out.println(taskManager.getTaskById(2));
+
+        assertNotNull(taskManager.getTaskById(2));
+
+        System.out.println(task1IdInTasks);
+
+        assertEquals(task1Id, task1IdInTasks);
     }
 
     @Test
