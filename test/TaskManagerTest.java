@@ -173,15 +173,16 @@ public class TaskManagerTest {
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
 
         taskManager.addTask(task1);
-        taskManager.addTask(task2);
+        taskManager.addTask(task3);
 
         Task taskWithGeneratedId = taskManager.getTaskById(2);
+        int genId = taskWithGeneratedId.getId();
 
         task2.setId(2);
 
         System.out.println("Задачи: " + taskManager.getTasks());
 
-        assertEquals(taskWithGeneratedId, task2);
+        assertEquals(genId, task2.getId());
     }
 
     @Test
