@@ -173,24 +173,17 @@ public class TaskManagerTest {
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
 
         taskManager.addTask(task1);
+        taskManager.addTask(task2);
+
+        Task taskWithGeneratedId = taskManager.getTaskById(2);
+
+        task2.setId(2);
+
+        Task taskWithSetId = task2;
 
         System.out.println("Задачи: " + taskManager.getTasks());
 
-        task1.setId(2);
-
-        int task1Id = task1.getId();
-
-        System.out.println("id первой задачи: " + task1Id);
-
-        int task1IdInTasks = taskManager.getTaskById(2).getId();
-
-        System.out.println(taskManager.getTaskById(2));
-
-        assertNotNull(taskManager.getTaskById(2));
-
-        System.out.println(task1IdInTasks);
-
-        assertEquals(task1Id, task1IdInTasks);
+        assertEquals(taskWithSetId, taskWithGeneratedId);
     }
 
     @Test
