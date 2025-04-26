@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import util.Managers;
 import util.TaskProgress;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,12 @@ public class TaskManagerTest {
             TaskProgress.NEW
     );
 
-    Task task3 = new Task("Name", "Descr", TaskProgress.NEW);
+    Task task3 = new Task(
+            "Съезить в отпуск",
+            "Накопить на отпуск",
+            TaskProgress.NEW
+    );
+
 
     Epic epic1 = new Epic(
             "Отпуск",
@@ -133,6 +139,8 @@ public class TaskManagerTest {
         assertNotNull(tasks, "Задачи не возвращаются.");
         assertEquals(1, tasks.size(), "Неверное количество задач.");
         assertEquals(task1, tasks.getFirst(), "Задачи не совпадают.");
+
+        taskManager.removeAllTasks();
     }
 
     @Test
@@ -172,17 +180,19 @@ public class TaskManagerTest {
     @Test
     void checkTasksWithGeneratedIdHaveNoConflictWithSetId() {
 
+        task1.setId(1);
+
+        System.out.println(task1.getId());
+
         taskManager.addTask(task1);
-        taskManager.addTask(task3);
 
-        Task taskWithGeneratedId = taskManager.getTaskById(2);
-        int genId = taskWithGeneratedId.getId();
+        Task newTask = taskManager.getTaskById(1);
 
-        task3.setId(2);
+        System.out.println(newTask.getId());
 
         System.out.println("Задачи: " + taskManager.getTasks());
 
-        assertEquals(genId, task3.getId());
+        assertEquals(task1.getId(), newTask.getId());
     }
 
     @Test
