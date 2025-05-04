@@ -48,7 +48,4 @@ public interface TaskManager {
     void removeSubtaskById(int epicId, int subtaskId);
 
     ArrayList<Task> getHistoryList();
-
-    //для теста
-    ArrayList<Task> getDoubleLinkedList();
 }
