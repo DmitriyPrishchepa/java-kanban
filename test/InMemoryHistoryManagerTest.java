@@ -39,9 +39,9 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     void shouldReturnTrueIfHistoryIsNotEmpty() {
+
         taskManager.addTask(task1);
         taskManager.addTask(task2);
-
         taskManager.getTaskById(1);
 
         Assertions.assertFalse(taskManager.getHistory().isEmpty());
@@ -56,5 +56,7 @@ public class InMemoryHistoryManagerTest {
         taskManager.getTaskById(1);
 
         Assertions.assertEquals(1, taskManager.getHistory().size());
+
+        taskManager.removeAllTasks();
     }
 }
