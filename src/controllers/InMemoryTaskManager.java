@@ -1,14 +1,15 @@
 package controllers;
 
+import exceptions.SubtaskNotFoundException;
+import exceptions.TaskNotFoundException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import util.Managers;
 import util.TaskProgress;
+import util.TaskTimeComparator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager, HistoryManager {
     private Map<Integer, Task> tasks = new HashMap<>();
@@ -16,6 +17,8 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     private Map<Integer, Subtask> subtasks = new HashMap<>();
 
     private final HistoryManager historyManager = Managers.getDefaultHistory();
+
+    Set<Task> tasksSortedByTime = new TreeSet<>(TaskTimeComparator.getTimeComparator());
 
     public InMemoryTaskManager() {
     }
@@ -111,12 +114,9 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
     @Override
     public Task getTaskById(int taskId) {
-        final Task task = tasks.get(taskId);
-        if (task != null) {
-            addTaskToHistory(task);
-            return task;
-        }
-        return null;
+        Optional<Task> optionalTask = Optional.ofNullable(tasks.get(taskId));
+        optionalTask.ifPresent(this::addTaskToHistory);
+        return optionalTask.orElseThrow(() -> new TaskNotFoundException("Задача не найдена"));
     }
 
     @Override
@@ -136,30 +136,33 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
     @Override
     public Subtask getSubtaskById(int id) {
-        final Subtask subtask = subtasks.get(id);
-        if (subtask != null) {
-            addTaskToHistory(subtask);
-            return subtask;
-        }
-        return null;
+        Optional<Subtask> optionalSubtask = Optional.ofNullable(subtasks.get(id));
+        return optionalSubtask.orElseThrow(() -> new SubtaskNotFoundException("Подзадача не найдена"));
     }
 
     @Override
     public Subtask getSubtaskInEpicById(int epicId, int subtaskId) {
         final Epic epic = epics.get(epicId);
-        if (epic != null) {
-            Subtask subtask = epic.getSubtasksOfEpic().get(subtaskId);
-            addTaskToHistory(subtask);
-            return subtask;
-        }
 
-        return null;
+        if (epic != null) {
+            Optional<Subtask> optionalSubtask = Optional.ofNullable(epic.getSubtasksOfEpic().get(subtaskId));
+            Subtask subtask = optionalSubtask.orElseThrow(() -> new SubtaskNotFoundException("Подзадача не найдена"));
+            optionalSubtask.ifPresent(this::addTaskToHistory);
+            return subtask;
+        } else {
+            Optional<Subtask> optionalSubtask = Optional.ofNullable(epic.getSubtasksOfEpic().get(subtaskId));
+            return optionalSubtask.orElseThrow(() -> new SubtaskNotFoundException("Подзадача не найдена"));
+        }
     }
 
-    //--------------------------------------------------
+//--------------------------------------------------
 
     @Override
     public int addTask(Task newTask) {
+        if (checkTasksIntersectionsByRuntime(newTask)) {
+            return 0;
+        }
+
         taskIdCounter++;
         newTask.setId(taskIdCounter);
         tasks.put(taskIdCounter, newTask);
@@ -176,13 +179,18 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
     @Override
     public int addSubtaskToEpic(int epicId, Subtask newSubtask) {
+
+        if (checkTasksIntersectionsByRuntime(newSubtask)) {
+            return 0;
+        }
+
         final Epic epic = epics.get(epicId);
         if (epic != null) {
             int newId = epic.getNewTaskIdCounter();
             newId = newId + 1;
             epic.setNewTaskIdCounter(newId);
             newSubtask.setId(epic.getNewTaskIdCounter());
-            newSubtask.setEpicId(epicId);
+            newSubtask.setEpicId(epic.getId());
 
             epic.addSubtask(newSubtask);
 
@@ -195,11 +203,17 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
         return 0;
     }
 
-    //--------------------------------------------------------
+//--------------------------------------------------------
 
     @Override
     public Task updateTask(int taskId, Task updatingTask) {
+
+        if (checkTasksIntersectionsByRuntime(updatingTask)) {
+            return null;
+        }
+
         final Task task = tasks.get(taskId);
+
         if (task != null) {
             task.setName(updatingTask.getName());
             if (updatingTask.getDescription() != null) {
@@ -303,5 +317,39 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void addTaskToHistory(Task anyTask) {
         historyManager.addTaskToHistory(anyTask);
+    }
+
+
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+
+        for (Task task : getTasks()) {
+            if (task.getStartTime() != null) {
+                tasksSortedByTime.add(task);
+            }
+        }
+
+        for (Subtask subtask : getSubtasks()) {
+            if (subtask.getStartTime() != null) {
+                tasksSortedByTime.add(subtask);
+            }
+        }
+
+        return tasksSortedByTime;
+    }
+
+    @Override
+    public boolean checkTasksIntersectionsByRuntime(Task task) {
+        Set<Task> prioritizedTasks = getPrioritizedTasks();
+
+        for (Task prioritizedTask : prioritizedTasks) {
+            if (prioritizedTask.getStartTime().isBefore(task.getEndTime()) &&
+                    prioritizedTask.getEndTime().isAfter(task.getStartTime())
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

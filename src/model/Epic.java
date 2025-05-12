@@ -2,6 +2,8 @@ package model;
 
 import util.TaskProgress;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.Map;
 public class Epic extends Task {
 
     private int newTaskIdCounter = 0;
+    private final LocalDateTime endTime;
 
     private final Map<Integer, Subtask> subtasksOfEpic;
 
@@ -17,7 +20,18 @@ public class Epic extends Task {
         this.name = name;
         this.description = description;
         this.status = status;
+
         subtasksOfEpic = new HashMap<>();
+
+        if (getSubtasksOfEpic().isEmpty()) {
+            this.startTime = LocalDateTime.now();
+            this.endTime = LocalDateTime.now();
+        } else {
+            this.startTime = getSubtasksOfEpic().get(1).startTime;
+            this.endTime = getSubtasksOfEpic().get(getSubtasksOfEpic().size()).getEndTime();
+        }
+
+        this.duration = Duration.between(this.startTime, this.endTime);
     }
 
     @Override
@@ -27,6 +41,8 @@ public class Epic extends Task {
                 ", description='" + description + '\'' +
                 ", id=" + id +
                 ", status=" + status +
+                ", duration=" + getDuration().toMinutes() +
+                ", startTime=" + getStartTime().format(dateTimeFormatter()) +
                 ", subTasks=";
 
         ArrayList<Task> stringTasks = new ArrayList<>(subtasksOfEpic.values());
@@ -61,6 +77,21 @@ public class Epic extends Task {
         if (!subtasksOfEpic.isEmpty()) {
             subtasksOfEpic.clear();
         }
+    }
+
+    @Override
+    public Duration getDuration() {
+        return super.getDuration();
+    }
+
+    @Override
+    public LocalDateTime getStartTime() {
+        return super.getStartTime();
+    }
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 }
 

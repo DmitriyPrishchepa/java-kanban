@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -147,7 +149,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
             if (path.toFile().length() == 0) {
-                writer.write("id,type,name,status,description,epic\n");
+                writer.write("id,type,name,status,description,duration,startTime,epic\n");
             }
 
             ArrayList<Task> tasks = getTasks();
@@ -180,7 +182,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             if (path.toFile().length() != 0) {
                 String line = Files.readString(path);
 
-                int stringLength = "id,type,name,status,description,epic\n".length();
+                int stringLength = "id,type,name,status,description,duration,startTime,epic\n".length();
 
                 String neededLine = line.substring(stringLength);
 
@@ -226,7 +228,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         result = result + "," +
                 task.getName() + "," +
                 task.getStatus() + "," +
-                task.getDescription();
+                task.getDescription() + "," +
+                task.getDuration().toMinutes() + "," +
+                task.getStartTime();
 
         if (task.getClass().equals(Subtask.class)) {
             result = result + ((Subtask) task).getEpicId();
@@ -243,10 +247,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String name = wordsArray[2];
         String description = wordsArray[4];
         String status = wordsArray[3];
+        int duration = Integer.parseInt(wordsArray[5]);
+        String startTime = wordsArray[6];
 
         switch (TypesOfTasks.valueOf(wordsArray[1])) {
             case TASK:
-                Task newTask = new Task(name, description, TaskProgress.valueOf(status));
+                Task newTask = new Task(name, description, TaskProgress.valueOf(status), Duration.ofMinutes(duration), LocalDateTime.parse(startTime));
                 newTask.setId(id);
                 return newTask;
             case EPIC:
@@ -254,7 +260,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 newEpic.setId(id);
                 return newEpic;
             case SUBTASK:
-                Subtask newSubtask = new Subtask(name, description, TaskProgress.valueOf(status));
+                Subtask newSubtask = new Subtask(name, description, TaskProgress.valueOf(status), Duration.ofMinutes(duration), LocalDateTime.parse(startTime));
                 newSubtask.setId(id);
                 return newSubtask;
         }

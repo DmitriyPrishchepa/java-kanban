@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public interface TaskManager {
     ArrayList<Task> getTasks();
@@ -48,4 +49,8 @@ public interface TaskManager {
     void removeSubtaskById(int epicId, int subtaskId);
 
     ArrayList<Task> getHistoryList();
+
+    Set<Task> getPrioritizedTasks();
+
+    boolean checkTasksIntersectionsByRuntime(Task task);
 }
