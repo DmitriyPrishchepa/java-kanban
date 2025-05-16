@@ -5,7 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 public interface TaskManager {
     ArrayList<Task> getTasks();
@@ -50,7 +50,7 @@ public interface TaskManager {
 
     ArrayList<Task> getHistoryList();
 
-    Set<Task> getPrioritizedTasks();
+    List<Task> getPrioritizedTasks();
 
     boolean checkTasksIntersectionsByRuntime(Task task);
 }

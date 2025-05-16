@@ -28,9 +28,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             Path path,
             HashMap<Integer, Task> newTasks,
             HashMap<Integer, Epic> newEpics,
-            HashMap<Integer, Subtask> newSubtasks
+            HashMap<Integer, Subtask> newSubtasks,
+            int taskIdCounter,
+            int epicIdCounter,
+            int subtaskIdCounter
     ) {
-        super(newTasks, newEpics, newSubtasks);
+        super(newTasks, newEpics, newSubtasks, taskIdCounter, epicIdCounter, subtaskIdCounter);
         this.path = path;
     }
 
@@ -178,6 +181,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         final HashMap<Integer, Epic> newEpics = new HashMap<>();
         final HashMap<Integer, Subtask> newSubtasks = new HashMap<>();
 
+        int taskIdCounter = 0;
+        int epicIdCounter = 0;
+        int subTaskIdCounter = 0;
+
         try {
             if (path.toFile().length() != 0) {
                 String line = Files.readString(path);
@@ -198,10 +205,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                         if (instanseOfTask != null) {
                             if (instanseOfTask.getClass().equals(Epic.class)) {
                                 newEpics.put(instanseOfTask.getId(), (Epic) instanseOfTask);
+                                epicIdCounter++;
                             } else if (instanseOfTask.getClass().equals(Subtask.class)) {
                                 newSubtasks.put(instanseOfTask.getId(), (Subtask) instanseOfTask);
+                                subTaskIdCounter++;
                             } else {
                                 newTasks.put(instanseOfTask.getId(), instanseOfTask);
+                                taskIdCounter++;
                             }
                         }
                     }
@@ -211,7 +221,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             throw new ManagerSaveException("Ошибка чтения из файла", e);
         }
 
-        return new FileBackedTaskManager(path, newTasks, newEpics, newSubtasks);
+        return new FileBackedTaskManager(
+                path,
+                newTasks,
+                newEpics,
+                newSubtasks,
+                taskIdCounter,
+                epicIdCounter,
+                subTaskIdCounter++
+        );
     }
 
     public String taskToString(Task task) {

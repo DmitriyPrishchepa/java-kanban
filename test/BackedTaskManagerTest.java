@@ -1,17 +1,11 @@
 import controllers.FileBackedTaskManager;
 import exceptions.ManagerSaveException;
-import model.Epic;
-import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import util.TaskProgress;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,7 +78,10 @@ public class BackedTaskManagerTest {
                 path,
                 new HashMap<>(),
                 new HashMap<>(),
-                new HashMap<>()
+                new HashMap<>(),
+                0,
+                0,
+                0
         );
         assertThrows(ManagerSaveException.class,
                 man::save
@@ -92,15 +89,8 @@ public class BackedTaskManagerTest {
     }
 
 //    @Test
-//    void testLoadFromFileException() {
-//        Path path = Paths.get("C://Users//Дмитрий//java-kanbin//java-kanban//tasks.csv");
-//        FileBackedTaskManager man = new FileBackedTaskManager(
-//                path,
-//                new HashMap<>(),
-//                new HashMap<>(),
-//                new HashMap<>()
-//        );
-//
+//    void testLoadFromFileException() throws FileNotFoundException {
+//        new PrintWriter(String.valueOf(path)).close();
 //        assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(path));
 //    }
 }

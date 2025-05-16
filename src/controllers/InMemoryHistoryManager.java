@@ -62,6 +62,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
+    @Override
+    public void removeFromHistory(int id) {
+        history.values().removeIf(task -> task.data.getId() == id);
+        historyLinkedList.removeIf(task -> task.getId() == id);
+    }
+
     public void removeNode(Node node) {
         history.values().removeIf(taskNode -> taskNode.equals(node));
     }

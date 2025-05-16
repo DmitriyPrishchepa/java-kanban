@@ -31,7 +31,13 @@ public class Epic extends Task {
             this.endTime = getSubtasksOfEpic().get(getSubtasksOfEpic().size()).getEndTime();
         }
 
-        this.duration = Duration.between(this.startTime, this.endTime);
+        Duration subDuration = Duration.ofMinutes(0);
+
+        for (Subtask subtask : getSubtasksOfEpic().values()) {
+            subDuration = subDuration.plus(subtask.getDuration());
+        }
+
+        this.duration = subDuration;
     }
 
     @Override
