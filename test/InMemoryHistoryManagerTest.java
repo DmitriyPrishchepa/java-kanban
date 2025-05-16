@@ -59,4 +59,33 @@ public class InMemoryHistoryManagerTest {
 
         taskManager.removeAllTasks();
     }
+
+//    @Test
+//    void shouldRemoveFromHistory() {
+//        taskManager.addTask(task1);
+//        taskManager.addTask(task2);
+//        taskManager.addTask(
+//                new Task(
+//                        "name 3",
+//                        "descr 3",
+//                        TaskProgress.NEW,
+//                        Duration.ofMinutes(1),
+//                        LocalDateTime.now()
+//                )
+//        );
+//
+//        taskManager.getTaskById(1);
+//        taskManager.getTaskById(2);
+//        taskManager.getTaskById(3);
+//
+//        System.out.println("История: " + taskManager.getHistory());
+//
+//        taskManager.removeTaskById(2);
+//
+//        System.out.println();
+//
+//        System.out.println("История с удалённым элементом: " + taskManager.getHistory());
+//
+//        Assertions.assertEquals(2, taskManager.getHistory().size());
+//    }
 }
