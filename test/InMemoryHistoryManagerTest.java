@@ -8,6 +8,7 @@ import util.TaskProgress;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class InMemoryHistoryManagerTest {
     InMemoryTaskManager taskManager;
@@ -49,43 +50,37 @@ public class InMemoryHistoryManagerTest {
 
     @Test
     void shouldReturnTrueIfTasksAreNotEquals() {
-        taskManager.addTask(task1);
-        taskManager.addTask(task1);
 
-        taskManager.getTaskById(1);
-        taskManager.getTaskById(1);
+        task1.setId(1);
+        task2.setId(2);
 
-        Assertions.assertEquals(1, taskManager.getHistory().size());
+        inMemoryHistoryManager.addTaskToHistory(task1);
+        inMemoryHistoryManager.addTaskToHistory(task2);
+
+        System.out.println(inMemoryHistoryManager.getHistory());
+
+        Assertions.assertEquals(2, inMemoryHistoryManager.getHistory().size());
 
         taskManager.removeAllTasks();
+
+        task1.setId(0);
+        task2.setId(0);
     }
 
-//    @Test
-//    void shouldRemoveFromHistory() {
-//        taskManager.addTask(task1);
-//        taskManager.addTask(task2);
-//        taskManager.addTask(
-//                new Task(
-//                        "name 3",
-//                        "descr 3",
-//                        TaskProgress.NEW,
-//                        Duration.ofMinutes(1),
-//                        LocalDateTime.now()
-//                )
-//        );
-//
-//        taskManager.getTaskById(1);
-//        taskManager.getTaskById(2);
-//        taskManager.getTaskById(3);
-//
-//        System.out.println("История: " + taskManager.getHistory());
-//
-//        taskManager.removeTaskById(2);
-//
-//        System.out.println();
-//
-//        System.out.println("История с удалённым элементом: " + taskManager.getHistory());
-//
-//        Assertions.assertEquals(2, taskManager.getHistory().size());
-//    }
+    @Test
+    void removeTaskWithRemovingFromHistory() {
+        task1.setId(1);
+        inMemoryHistoryManager.addTaskToHistory(task1);
+        Assertions.assertEquals(1, inMemoryHistoryManager.getHistory().size());
+
+        task2.setId(2);
+        inMemoryHistoryManager.addTaskToHistory(task2);
+        Assertions.assertEquals(2, inMemoryHistoryManager.getHistory().size());
+
+        inMemoryHistoryManager.removeFromHistory(task1.getId());
+        Assertions.assertEquals(1, inMemoryHistoryManager.getHistory().size());
+
+        List<Task> tasks = inMemoryHistoryManager.getHistory();
+        System.out.println(tasks);
+    }
 }

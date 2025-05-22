@@ -1,4 +1,5 @@
 import controllers.FileBackedTaskManager;
+import exceptions.ManagerLoadFromFileException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -27,7 +28,7 @@ public class Main {
                 Files.createFile(path);
             }
             fileBackedTaskManager = FileBackedTaskManager.loadFromFile(path);
-        } catch (IOException e) {
+        } catch (ManagerLoadFromFileException | IOException e) {
             System.out.println("Ошибка создания файла");
         }
 
@@ -71,7 +72,7 @@ public class Main {
                                     subTaskName,
                                     subTaskDescription,
                                     TaskProgress.NEW,
-                                    Duration.ofMinutes(30),
+                                    Duration.ofMinutes(1),
                                     LocalDateTime.now()
                             )
                     );

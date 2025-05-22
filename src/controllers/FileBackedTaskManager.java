@@ -1,5 +1,6 @@
 package controllers;
 
+import exceptions.ManagerLoadFromFileException;
 import exceptions.ManagerSaveException;
 import model.Epic;
 import model.Subtask;
@@ -186,8 +187,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         int subTaskIdCounter = 0;
 
         try {
-            if (path.toFile().length() != 0) {
+            if (Files.size(path) > 0) {
+
                 String line = Files.readString(path);
+
+                System.out.println("line: " + line);
 
                 int stringLength = "id,type,name,status,description,duration,startTime,epic\n".length();
 
@@ -217,19 +221,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     }
                 }
             }
-        } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка чтения из файла", e);
-        }
 
-        return new FileBackedTaskManager(
-                path,
-                newTasks,
-                newEpics,
-                newSubtasks,
-                taskIdCounter,
-                epicIdCounter,
-                subTaskIdCounter++
-        );
+            return new FileBackedTaskManager(
+                    path,
+                    newTasks,
+                    newEpics,
+                    newSubtasks,
+                    taskIdCounter,
+                    epicIdCounter,
+                    subTaskIdCounter
+            );
+        } catch (IOException e) {
+            throw new ManagerLoadFromFileException("Ошибка чтения из файла", e);
+        }
     }
 
     public String taskToString(Task task) {

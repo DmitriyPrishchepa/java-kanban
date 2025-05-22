@@ -1,4 +1,5 @@
 import controllers.FileBackedTaskManager;
+import exceptions.ManagerLoadFromFileException;
 import exceptions.ManagerSaveException;
 import model.Task;
 import org.junit.jupiter.api.Assertions;
@@ -39,10 +40,8 @@ public class BackedTaskManagerTest {
     @BeforeAll
     static void createFile() throws IOException {
         path = File.createTempFile("testTasks", ".csv").toPath();
+
         manager = FileBackedTaskManager.loadFromFile(path);
-        manager.removeAllTasks();
-        manager.addTask(task1);
-        manager.addTask(task2);
     }
 
     @Test
@@ -53,6 +52,9 @@ public class BackedTaskManagerTest {
     @Test
     void shouldSaveSeveralTasks() {
 
+        manager.addTask(task1);
+        manager.addTask(task2);
+
         try (BufferedReader br = new BufferedReader(new FileReader(String.valueOf(path.getFileName()), StandardCharsets.UTF_8))) {
 
             while (br.ready()) {
@@ -60,6 +62,8 @@ public class BackedTaskManagerTest {
                 System.out.println("Tasks: " + stringValue);
                 Assertions.assertFalse(stringValue.isEmpty());
             }
+
+            new FileOutputStream(String.valueOf(path)).close();
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка записи в файл", e);
         }
@@ -88,9 +92,9 @@ public class BackedTaskManagerTest {
         );
     }
 
-//    @Test
-//    void testLoadFromFileException() throws FileNotFoundException {
-//        new PrintWriter(String.valueOf(path)).close();
-//        assertThrows(ManagerSaveException.class, () -> FileBackedTaskManager.loadFromFile(path));
-//    }
+    @Test
+    void testLoadFromFileException() {
+        Path invalidPath = Paths.get("C://Users//Дмитрий//java-kanbin//java-kanban//tasks.csv");
+        assertThrows(ManagerLoadFromFileException.class, () -> FileBackedTaskManager.loadFromFile(invalidPath));
+    }
 }
