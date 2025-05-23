@@ -15,7 +15,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    static final Path path = Paths.get("C://Users//Дмитрий//java-kanban//java-kanban//tasks.csv");
+    static final Path path = Paths.get("tasks.csv");
 
     public static Scanner scanner = new Scanner(System.in);
 
