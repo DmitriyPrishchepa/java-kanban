@@ -1,4 +1,5 @@
 import controllers.FileBackedTaskManager;
+import exceptions.ManagerLoadFromFileException;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -8,11 +9,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class Main {
 
-    static final Path path = Paths.get("C://Users//Дмитрий//java-banban-2//java-kanban//tasks.csv");
+    static final Path path = Paths.get("tasks.csv");
 
     public static Scanner scanner = new Scanner(System.in);
 
@@ -25,7 +28,7 @@ public class Main {
                 Files.createFile(path);
             }
             fileBackedTaskManager = FileBackedTaskManager.loadFromFile(path);
-        } catch (IOException e) {
+        } catch (ManagerLoadFromFileException | IOException e) {
             System.out.println("Ошибка создания файла");
         }
 
@@ -45,7 +48,7 @@ public class Main {
                     String taskName = scanner.nextLine();
                     System.out.println("Введите описание задачи:");
                     String taskDescription = scanner.nextLine();
-                    fileBackedTaskManager.addTask(new Task(taskName, taskDescription, TaskProgress.NEW));
+                    fileBackedTaskManager.addTask(new Task(taskName, taskDescription, TaskProgress.NEW, Duration.ofMinutes(1), LocalDateTime.now()));
                     break;
                 case 2:
                     System.out.println("Чтобы создать Эпик, нужно ввести данные:");
@@ -63,7 +66,16 @@ public class Main {
                     String subTaskName = scanner.nextLine();
                     System.out.println("Введите описание подзадачи");
                     String subTaskDescription = scanner.nextLine();
-                    fileBackedTaskManager.addSubtaskToEpic(epicId, new Subtask(subTaskName, subTaskDescription, TaskProgress.NEW));
+                    fileBackedTaskManager.addSubtaskToEpic(
+                            epicId,
+                            new Subtask(
+                                    subTaskName,
+                                    subTaskDescription,
+                                    TaskProgress.NEW,
+                                    Duration.ofMinutes(1),
+                                    LocalDateTime.now()
+                            )
+                    );
                     break;
                 case 4:
                     System.out.println("Чтобы обновить задачу, нужно ввести данные:");
@@ -102,7 +114,9 @@ public class Main {
                             neededSubtaskId,
                             new Subtask(updatedSubTaskName,
                                     updatedSubtaskDescription,
-                                    TaskProgress.valueOf(updatedSubtaskStatus)
+                                    TaskProgress.valueOf(updatedSubtaskStatus),
+                                    Duration.ofMinutes(30),
+                                    LocalDateTime.now()
                             )
                     );
                     break;

@@ -2,6 +2,9 @@ package model;
 
 import util.TaskProgress;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
@@ -9,6 +12,8 @@ public class Task {
     protected String description;
     protected int id;
     protected TaskProgress status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
 
     @Override
@@ -18,7 +23,17 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", id=" + id +
                 ", status=" + status +
+                ", duration=" + getDuration().toMinutes() +
+                ", startTime=" + getStartTime().format(dateTimeFormatter()) +
                 '}';
+    }
+
+    public Task(String name, String description, TaskProgress status, Duration duration, LocalDateTime startTime) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
     }
 
     public Task(String name, String description, TaskProgress status) {
@@ -59,6 +74,18 @@ public class Task {
         this.id = id;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plusMinutes(duration.toMinutes());
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -91,5 +118,9 @@ public class Task {
         hash = hash * 31;
 
         return hash;
+    }
+
+    public DateTimeFormatter dateTimeFormatter() {
+        return DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
     }
 }
