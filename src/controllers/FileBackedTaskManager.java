@@ -282,7 +282,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 newEpic.setId(id);
                 return newEpic;
             case SUBTASK:
-                Subtask newSubtask = new Subtask(name, description, TaskProgress.valueOf(status), Duration.ofMinutes(duration), LocalDateTime.parse(startTime));
+                String sub = startTime.substring(0, startTime.length() - 1);
+                Subtask newSubtask = new Subtask(name, description, TaskProgress.valueOf(status), Duration.ofMinutes(duration), LocalDateTime.parse(sub));
                 newSubtask.setId(id);
                 return newSubtask;
         }

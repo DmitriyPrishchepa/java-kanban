@@ -48,8 +48,6 @@ public interface TaskManager {
 
     void removeSubtaskById(int epicId, int subtaskId);
 
-    ArrayList<Task> getHistoryList();
-
     List<Task> getPrioritizedTasks();
 
     boolean checkTasksIntersectionsByRuntime(Task task);
