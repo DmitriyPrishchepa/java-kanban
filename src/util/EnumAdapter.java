@@ -5,11 +5,12 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class EnumAdapter extends TypeAdapter<TaskProgress> {
     @Override
     public void write(JsonWriter jsonWriter, TaskProgress taskProgress) throws IOException {
-        jsonWriter.value(String.valueOf(TaskProgress.NEW));
+        jsonWriter.value(Arrays.toString(TaskProgress.values()));
     }
 
     @Override
