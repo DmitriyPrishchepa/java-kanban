@@ -143,11 +143,6 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     }
 
     @Override
-    public ArrayList<Task> getHistoryList() {
-        return getHistory();
-    }
-
-    @Override
     public Subtask getSubtaskById(int id) {
         Optional<Subtask> optionalSubtask = Optional.ofNullable(subtasks.get(id));
         return optionalSubtask.orElseThrow(() -> new SubtaskNotFoundException("Подзадача не найдена"));
