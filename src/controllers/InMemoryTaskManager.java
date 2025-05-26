@@ -1,5 +1,6 @@
 package controllers;
 
+import exceptions.EpicNotFoundException;
 import exceptions.SubtaskNotFoundException;
 import exceptions.TaskNotFoundException;
 import model.Epic;
@@ -9,6 +10,7 @@ import util.Managers;
 import util.TaskProgress;
 import util.TaskTimeComparator;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager, HistoryManager {
@@ -126,14 +128,14 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     //--------------------------------------------------------
 
     @Override
-    public Task getTaskById(int taskId) {
+    public Task getTaskById(int taskId) throws TaskNotFoundException {
         Optional<Task> optionalTask = Optional.ofNullable(tasks.get(taskId));
         optionalTask.ifPresent(this::addTaskToHistory);
         return optionalTask.orElseThrow(() -> new TaskNotFoundException("Задача не найдена"));
     }
 
     @Override
-    public Epic getEpicById(int epicId) {
+    public Epic getEpicById(int epicId) throws EpicNotFoundException {
         final Epic epic = epics.get(epicId);
         if (epic != null) {
             addTaskToHistory(epic);
@@ -143,13 +145,13 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     }
 
     @Override
-    public Subtask getSubtaskById(int id) {
+    public Subtask getSubtaskById(int id) throws SubtaskNotFoundException {
         Optional<Subtask> optionalSubtask = Optional.ofNullable(subtasks.get(id));
         return optionalSubtask.orElseThrow(() -> new SubtaskNotFoundException("Подзадача не найдена"));
     }
 
     @Override
-    public Subtask getSubtaskInEpicById(int epicId, int subtaskId) {
+    public Subtask getSubtaskInEpicById(int epicId, int subtaskId) throws SubtaskNotFoundException {
         final Epic epic = epics.get(epicId);
 
         if (epic != null) {
@@ -207,13 +209,6 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     public int addSubtaskToEpic(int epicId, Subtask newSubtask) {
         final Epic epic = epics.get(epicId);
         if (epic != null) {
-            int newId = epic.getNewTaskIdCounter();
-            newId = newId + 1;
-            epic.setNewTaskIdCounter(newId);
-            newSubtask.setId(epic.getNewTaskIdCounter());
-            newSubtask.setEpicId(epic.getId());
-
-            epic.addSubtask(newSubtask);
 
             if (newSubtask.getStartTime() != null &&
                     newSubtask.getDuration() != null &&
@@ -224,6 +219,13 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
             if (newSubtask.getStartTime() == null &&
                     newSubtask.getDuration() == null) {
+                int newId = epic.getNewTaskIdCounter();
+                newId = newId + 1;
+                epic.setNewTaskIdCounter(newId);
+                newSubtask.setId(epic.getNewTaskIdCounter());
+                newSubtask.setEpicId(epic.getId());
+                epic.addSubtask(newSubtask);
+
                 subTaskIdCounter++;
                 newSubtask.setId(subTaskIdCounter);
                 subtasks.put(subTaskIdCounter, newSubtask);
@@ -233,16 +235,21 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
             if (newSubtask.getStartTime() != null &&
                     newSubtask.getDuration() != null &&
                     !checkTasksIntersectionsByRuntime(newSubtask)) {
+                int newId = epic.getNewTaskIdCounter();
+                newId = newId + 1;
+                epic.setNewTaskIdCounter(newId);
+                newSubtask.setId(epic.getNewTaskIdCounter());
+                newSubtask.setEpicId(epic.getId());
+                epic.addSubtask(newSubtask);
+
                 subTaskIdCounter++;
                 newSubtask.setId(subTaskIdCounter);
                 subtasks.put(subTaskIdCounter, newSubtask);
                 tasksSortedByTime.add(newSubtask);
                 return newSubtask.getId();
             }
-
             return newSubtask.getId();
         }
-
         return 0;
     }
 
@@ -413,5 +420,10 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void removeFromHistory(int id) {
         historyManager.removeFromHistory(id);
+    }
+
+    @Override
+    public FileBackedTaskManager createFileBackedTaskManager(Path path) {
+        return FileBackedTaskManager.loadFromFile(path);
     }
 }

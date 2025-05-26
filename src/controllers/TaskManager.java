@@ -4,6 +4,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,4 +52,8 @@ public interface TaskManager {
     List<Task> getPrioritizedTasks();
 
     boolean checkTasksIntersectionsByRuntime(Task task);
+
+    FileBackedTaskManager createFileBackedTaskManager(Path path);
+
+    ArrayList<Task> getHistory();
 }

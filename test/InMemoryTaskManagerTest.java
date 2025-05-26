@@ -320,7 +320,7 @@ public class InMemoryTaskManagerTest {
                         LocalDateTime.now())
         );
 
-        taskManager.updateSubtask(newEpicId, 1, new Subtask(  "Отпуск",
+        taskManager.updateSubtask(newEpicId, 1, new Subtask("Отпуск",
                 "Планы на отпуск",
                 TaskProgress.DONE,
                 Duration.ofSeconds(2),
