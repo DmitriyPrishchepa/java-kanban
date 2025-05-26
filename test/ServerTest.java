@@ -3,6 +3,7 @@ import controllers.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,11 @@ public class ServerTest {
         server = new HttpTaskServer(manager);
 
         server.start();
+    }
+
+    @AfterEach
+    public void shutDown() {
+        server.stop();
     }
 
     @Test
