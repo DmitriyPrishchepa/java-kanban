@@ -169,6 +169,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
     @Override
     public int addTask(Task newTask) {
+
         if (newTask.getStartTime() != null &&
                 newTask.getDuration() != null &&
                 checkTasksIntersectionsByRuntime(newTask)
@@ -256,15 +257,20 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 //--------------------------------------------------------
 
     @Override
-    public Task updateTask(int taskId, Task updatingTask) {
+    public Task updateTask(int taskId, Task updatingTask) throws TaskNotFoundException {
 
-        if (checkTasksIntersectionsByRuntime(updatingTask)) {
+        if (updatingTask.getStartTime() != null &&
+                updatingTask.getDuration() != null &&
+                checkTasksIntersectionsByRuntime(updatingTask)
+        ) {
             return null;
         }
 
-        final Task task = tasks.get(taskId);
+        if (updatingTask.getStartTime() == null &&
+                updatingTask.getDuration() == null) {
 
-        if (task != null) {
+            final Task task = tasks.get(taskId);
+
             task.setName(updatingTask.getName());
             if (updatingTask.getDescription() != null) {
                 task.setDescription(updatingTask.getDescription());
@@ -272,6 +278,33 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
             task.setStatus(updatingTask.getStatus());
             return task;
         }
+
+        if (updatingTask.getStartTime() != null &&
+                updatingTask.getDuration() != null &&
+                !checkTasksIntersectionsByRuntime(updatingTask)) {
+
+            final Task task = tasks.get(taskId);
+            final Task prioritizedTask = tasks.get(taskId);
+
+            task.setName(updatingTask.getName());
+            if (updatingTask.getDescription() != null) {
+                task.setDescription(updatingTask.getDescription());
+            }
+            task.setStatus(updatingTask.getStatus());
+            task.setDuration(updatingTask.getDuration());
+            task.setStartTime(updatingTask.getStartTime());
+
+            prioritizedTask.setName(updatingTask.getName());
+            if (updatingTask.getDescription() != null) {
+                prioritizedTask.setDescription(updatingTask.getDescription());
+            }
+            prioritizedTask.setStatus(updatingTask.getStatus());
+            prioritizedTask.setDuration(updatingTask.getDuration());
+            prioritizedTask.setStartTime(updatingTask.getStartTime());
+
+            return task;
+        }
+
         return null;
     }
 

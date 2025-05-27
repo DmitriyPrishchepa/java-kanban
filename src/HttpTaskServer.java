@@ -329,7 +329,9 @@ public class HttpTaskServer {
         protected void processPost(HttpExchange exchange) throws IOException {
 
             InputStream inputStream = exchange.getRequestBody();
-            String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET).trim();
+            String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
+
+            System.out.println(body);
 
             Optional<Integer> id = getById(exchange);
 
@@ -346,9 +348,14 @@ public class HttpTaskServer {
             } else {
                 try {
                     final Task task = gson.fromJson(body, Task.class);
-                    Task updatedTask = manager.updateTask(id.get(), task);
-                    System.out.println("Задача обновлена: " + updatedTask);
-                    sendSuccessText(exchange, "Задача успешно обновлена");
+                    try {
+                        Task updatedTask = manager.updateTask(id.get(), task);
+                        System.out.println("Задача обновлена: " + updatedTask);
+                        sendSuccessText(exchange, "Задача успешно обновлена");
+                    } catch (TaskNotFoundException e) {
+                        System.out.println("Задача не найдена");
+                        sendNotFound(exchange);
+                    }
                 } catch (TaskIntersectException e) {
                     System.out.println("Задача пересекается с существующей");
                     sendHasIntersections(exchange);
@@ -555,8 +562,13 @@ public class HttpTaskServer {
 
     private static Optional<Integer> getById(HttpExchange exchange) {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
+
         try {
-            return Optional.of(Integer.parseInt(pathParts[2]));
+            if (pathParts.length == 3) {
+                return Optional.of(Integer.parseInt(pathParts[2]));
+            } else {
+                return Optional.empty();
+            }
         } catch (NumberFormatException exception) {
             return Optional.empty();
         }

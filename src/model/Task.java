@@ -1,5 +1,6 @@
 package model;
 
+import adapters.DurationAdapter;
 import util.TaskProgress;
 
 import java.time.Duration;
@@ -78,8 +79,16 @@ public class Task {
         return duration;
     }
 
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
     public LocalDateTime getStartTime() {
         return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
     public LocalDateTime getEndTime() {
