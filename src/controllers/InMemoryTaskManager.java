@@ -2,6 +2,7 @@ package controllers;
 
 import exceptions.EpicNotFoundException;
 import exceptions.SubtaskNotFoundException;
+import exceptions.TaskIntersectException;
 import exceptions.TaskNotFoundException;
 import model.Epic;
 import model.Subtask;
@@ -266,7 +267,7 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 //--------------------------------------------------------
 
     @Override
-    public Task updateTask(int taskId, Task updatingTask) throws TaskNotFoundException {
+    public Task updateTask(int taskId, Task updatingTask) throws TaskNotFoundException, TaskIntersectException {
 
         Task task = tasks.get(taskId);
         Task priorTask = null;
@@ -278,6 +279,11 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
         }
 
         if (task != null && priorTask != null) {
+
+            if (checkTasksIntersectionsByRuntime(updatingTask)) {
+                return task;
+            }
+
             if (updatingTask.getStartTime() == null &&
                     updatingTask.getDuration() == null) {
                 task.setName(updatingTask.getName());
@@ -321,9 +327,15 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
 
     @Override
     public Subtask updateSubtask(int epicId, int subTaskId, Subtask updatingSubtask) {
+
         final Epic epic = epics.get(epicId);
         if (epic != null) {
+
             final Subtask subtaskInEpic = epic.getSubtasksOfEpic().get(subTaskId);
+
+            if (checkTasksIntersectionsByRuntime(updatingSubtask)) {
+                return subtaskInEpic;
+            }
             Task priorTask = null;
 
             for (Task prior : getPrioritizedTasks()) {
