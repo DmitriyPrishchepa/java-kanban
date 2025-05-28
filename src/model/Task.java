@@ -1,6 +1,5 @@
 package model;
 
-import adapters.DurationAdapter;
 import util.TaskProgress;
 
 import java.time.Duration;

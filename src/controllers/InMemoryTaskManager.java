@@ -81,6 +81,10 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
             for (Task task : tasks.values()) {
                 removeFromHistory(task.getId());
             }
+
+            for (Task task : tasks.values()) {
+                getPrioritizedTasks().removeIf(task::equals);
+            }
             tasks.clear();
         }
     }
@@ -100,6 +104,11 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public void removeAllSubtasks() {
         if (!subtasks.isEmpty()) {
+
+            for (Subtask subtask : subtasks.values()) {
+                getPrioritizedTasks().removeIf(subtask::equals);
+            }
+
             subtasks.clear();
             if (!epics.isEmpty()) {
                 for (Epic epic : epics.values()) {
@@ -259,93 +268,144 @@ public class InMemoryTaskManager implements TaskManager, HistoryManager {
     @Override
     public Task updateTask(int taskId, Task updatingTask) throws TaskNotFoundException {
 
-        if (updatingTask.getStartTime() != null &&
-                updatingTask.getDuration() != null &&
-                checkTasksIntersectionsByRuntime(updatingTask)
-        ) {
-            return null;
+        Task task = tasks.get(taskId);
+        Task priorTask = null;
+
+        for (Task prior : getPrioritizedTasks()) {
+            if (prior.equals(task)) {
+                priorTask = prior;
+            }
         }
 
-        if (updatingTask.getStartTime() == null &&
-                updatingTask.getDuration() == null) {
+        if (task != null && priorTask != null) {
+            if (updatingTask.getStartTime() == null &&
+                    updatingTask.getDuration() == null) {
+                task.setName(updatingTask.getName());
+                if (updatingTask.getDescription() != null) {
+                    task.setDescription(updatingTask.getDescription());
+                }
+                task.setStatus(updatingTask.getStatus());
 
-            final Task task = tasks.get(taskId);
+                priorTask.setName(updatingTask.getName());
+                if (updatingTask.getDescription() != null) {
+                    priorTask.setDescription(updatingTask.getDescription());
+                }
+                priorTask.setStatus(updatingTask.getStatus());
 
-            task.setName(updatingTask.getName());
-            if (updatingTask.getDescription() != null) {
-                task.setDescription(updatingTask.getDescription());
+                return task;
             }
-            task.setStatus(updatingTask.getStatus());
-            return task;
+
+            if (updatingTask.getStartTime() != null &&
+                    updatingTask.getDuration() != null) {
+                task.setName(updatingTask.getName());
+                if (updatingTask.getDescription() != null) {
+                    task.setDescription(updatingTask.getDescription());
+                }
+                task.setStatus(updatingTask.getStatus());
+                task.setDuration(updatingTask.getDuration());
+                task.setStartTime(updatingTask.getStartTime());
+
+                priorTask.setName(updatingTask.getName());
+                if (updatingTask.getDescription() != null) {
+                    priorTask.setDescription(updatingTask.getDescription());
+                }
+                priorTask.setStatus(updatingTask.getStatus());
+                priorTask.setDuration(updatingTask.getDuration());
+                priorTask.setStartTime(updatingTask.getStartTime());
+
+                return task;
+            }
         }
-
-        if (updatingTask.getStartTime() != null &&
-                updatingTask.getDuration() != null &&
-                !checkTasksIntersectionsByRuntime(updatingTask)) {
-
-            final Task task = tasks.get(taskId);
-            final Task prioritizedTask = tasks.get(taskId);
-
-            task.setName(updatingTask.getName());
-            if (updatingTask.getDescription() != null) {
-                task.setDescription(updatingTask.getDescription());
-            }
-            task.setStatus(updatingTask.getStatus());
-            task.setDuration(updatingTask.getDuration());
-            task.setStartTime(updatingTask.getStartTime());
-
-            prioritizedTask.setName(updatingTask.getName());
-            if (updatingTask.getDescription() != null) {
-                prioritizedTask.setDescription(updatingTask.getDescription());
-            }
-            prioritizedTask.setStatus(updatingTask.getStatus());
-            prioritizedTask.setDuration(updatingTask.getDuration());
-            prioritizedTask.setStartTime(updatingTask.getStartTime());
-
-            return task;
-        }
-
-        return null;
+        return task;
     }
 
     @Override
     public Subtask updateSubtask(int epicId, int subTaskId, Subtask updatingSubtask) {
-
-        if (checkTasksIntersectionsByRuntime(updatingSubtask)) {
-            return null;
-        }
-
         final Epic epic = epics.get(epicId);
         if (epic != null) {
-            final Subtask subtask = epic.getSubtasksOfEpic().get(subTaskId);
-            if (subtask != null) {
-                subtask.setName(updatingSubtask.getName());
-                if (updatingSubtask.getDescription() != null) {
-                    subtask.setDescription(updatingSubtask.getDescription());
-                }
-                subtask.setStatus(updatingSubtask.getStatus());
+            final Subtask subtaskInEpic = epic.getSubtasksOfEpic().get(subTaskId);
+            Task priorTask = null;
 
-                for (Subtask subtask1 : subtasks.values()) {
-                    if (subtask1.equals(subtask)) {
+            for (Task prior : getPrioritizedTasks()) {
+                if (prior.equals(subtaskInEpic)) {
+                    priorTask = prior;
+                }
+            }
+
+            for (Subtask subtask1 : subtasks.values()) {
+                if (subtask1.equals(priorTask)) {
+
+                    if (updatingSubtask.getStartTime() == null &&
+                            updatingSubtask.getDuration() == null) {
+
                         subtask1.setName(updatingSubtask.getName());
                         if (subtask1.getDescription() != null) {
                             subtask1.setDescription(updatingSubtask.getDescription());
                         }
                         subtask1.setStatus(updatingSubtask.getStatus());
                     }
+
+                    if (updatingSubtask.getStartTime() != null &&
+                            updatingSubtask.getDuration() != null) {
+                        subtask1.setName(updatingSubtask.getName());
+                        if (subtask1.getDescription() != null) {
+                            subtask1.setDescription(updatingSubtask.getDescription());
+                        }
+                        subtask1.setStatus(updatingSubtask.getStatus());
+                        subtask1.setDuration(updatingSubtask.getDuration());
+                        subtask1.setStartTime(updatingSubtask.getStartTime());
+                    }
+                }
+            }
+
+            if (subtaskInEpic != null && priorTask != null) {
+                if (updatingSubtask.getStartTime() == null &&
+                        updatingSubtask.getDuration() == null) {
+                    subtaskInEpic.setName(updatingSubtask.getName());
+                    if (updatingSubtask.getDescription() != null) {
+                        subtaskInEpic.setDescription(updatingSubtask.getDescription());
+                    }
+                    subtaskInEpic.setStatus(updatingSubtask.getStatus());
+
+                    priorTask.setName(updatingSubtask.getName());
+                    if (updatingSubtask.getDescription() != null) {
+                        priorTask.setDescription(updatingSubtask.getDescription());
+                    }
+                    priorTask.setStatus(updatingSubtask.getStatus());
+
+                    return subtaskInEpic;
+                }
+
+                if (updatingSubtask.getStartTime() != null &&
+                        updatingSubtask.getDuration() != null) {
+                    subtaskInEpic.setName(updatingSubtask.getName());
+                    if (updatingSubtask.getDescription() != null) {
+                        subtaskInEpic.setDescription(updatingSubtask.getDescription());
+                    }
+                    subtaskInEpic.setStatus(updatingSubtask.getStatus());
+                    subtaskInEpic.setDuration(updatingSubtask.getDuration());
+                    subtaskInEpic.setStartTime(updatingSubtask.getStartTime());
+
+                    priorTask.setName(updatingSubtask.getName());
+                    if (updatingSubtask.getDescription() != null) {
+                        priorTask.setDescription(updatingSubtask.getDescription());
+                    }
+                    priorTask.setStatus(updatingSubtask.getStatus());
+                    priorTask.setDuration(updatingSubtask.getDuration());
+                    priorTask.setStartTime(updatingSubtask.getStartTime());
+
+                    return subtaskInEpic;
                 }
 
                 if (epic.getSubtasksOfEpic().values().stream()
-                        .allMatch(task -> task.getStatus().equals(TaskProgress.NEW))) {
+                        .allMatch(task1 -> task1.getStatus().equals(TaskProgress.NEW))) {
                     epic.setStatus(TaskProgress.NEW);
                 } else if (epic.getSubtasksOfEpic().values().stream()
-                        .allMatch(task -> task.getStatus().equals(TaskProgress.DONE))) {
+                        .allMatch(task1 -> task1.getStatus().equals(TaskProgress.DONE))) {
                     epic.setStatus(TaskProgress.DONE);
                 } else {
                     epic.setStatus(TaskProgress.IN_PROGRESS);
                 }
-
-                return subtask;
             }
         }
         return null;

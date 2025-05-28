@@ -1,15 +1,7 @@
-import adapters.DateTimeAdapter;
-import adapters.DurationAdapter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import controllers.TaskManager;
-import exceptions.EpicNotFoundException;
-import exceptions.SubtaskNotFoundException;
-import exceptions.TaskIntersectException;
-import exceptions.TaskNotFoundException;
-import handlers.BaseHttpHandler;
+import exceptions.ManagerLoadFromFileException;
+import handlers.*;
 import model.Epic;
 import model.Subtask;
 import model.Task;
@@ -17,41 +9,43 @@ import util.Managers;
 import util.TaskProgress;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class HttpTaskServer {
 
-    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
     private static final int PORT = 8080;
-    private final TaskManager manager;
+    private static final Path path = Paths.get("tasks.csv");
+    private TaskManager manager;
     private final HttpServer server;
 
-    static final Path path = Paths.get("tasks.csv");
-
     public HttpTaskServer(TaskManager manager) throws IOException {
-        this.manager = manager;
+
+        try {
+            if (!Files.exists(path)) {
+                Files.createFile(path);
+            }
+            this.manager = manager;
+        } catch (ManagerLoadFromFileException | IOException e) {
+            System.out.println("Ошибка создания файла");
+        }
 
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
-        server.createContext("/tasks", new TasksHandler(manager));
-        server.createContext("/tasks/{id}", new TasksHandler(manager));
-        server.createContext("/epics", new EpicsHandler(manager));
-        server.createContext("/epics/{id}", new EpicsHandler(manager));
-        server.createContext("/subtasks", new SubtasksHandler(manager));
-        server.createContext("/subtasks/{id}", new SubtasksHandler(manager));
-        server.createContext("/subtasks/{epicId}/{subtaskId}", new SubtasksHandler(manager));
+        server.createContext("/tasks", new TasksHandler(this.manager));
+        server.createContext("/tasks/{id}", new TasksHandler(this.manager));
+        server.createContext("/epics", new EpicsHandler(this.manager));
+        server.createContext("/epics/{id}", new EpicsHandler(this.manager));
+        server.createContext("/subtasks", new SubtasksHandler(this.manager));
+        server.createContext("/subtasks/{id}", new SubtasksHandler(this.manager));
+        server.createContext("/subtasks/{epicId}/{subtaskId}", new SubtasksHandler(this.manager));
         server.createContext("/history", new HistoryHandler(manager));
-        server.createContext("/prioritized", new PrioritizedTasksHandler(manager));
+        server.createContext("/prioritized", new PrioritizedTasksHandler(this.manager));
     }
 
     public void start() {
@@ -64,28 +58,12 @@ public class HttpTaskServer {
         System.out.println("Остановили сервер на порту " + PORT);
     }
 
-    static Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .serializeNulls()
-            .registerTypeAdapter(Duration.class, new DurationAdapter())
-            .registerTypeAdapter(LocalDateTime.class, new DateTimeAdapter())
-            .create();
-
     public static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException {
         TaskManager taskManager = Managers.getDefault();
         HttpTaskServer taskServer = new HttpTaskServer(taskManager);
         taskServer.start();
-
-//        try {
-//            if (!Files.exists(path)) {
-//                Files.createFile(path);
-//            }
-//            manager = manager.createFileBackedTaskManager(path);
-//        } catch (ManagerLoadFromFileException | IOException e) {
-//            System.out.println("Ошибка создания файла");
-//        }
 
         while (true) {
             printMenu();
@@ -285,292 +263,5 @@ public class HttpTaskServer {
         System.out.println("20 - удалить все подзадачи в эпике");
         System.out.println("21 - посмотреть историю");
         System.out.println("22 - выйти из программы");
-    }
-
-    static class TasksHandler extends BaseHttpHandler {
-
-        TaskManager manager;
-
-        public TasksHandler(TaskManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        protected void processGet(HttpExchange exchange) throws IOException {
-            String response;
-
-            String[] splitStrings = getTaskIdFromURI(exchange);
-
-            if (splitStrings.length == 2) {
-                response = manager.getTasks().stream()
-                        .map(Task::toString)
-                        .collect(Collectors.joining("\n"));
-
-                sendSuccessText(exchange, response);
-            }
-
-            if (splitStrings.length == 3) {
-                Optional<Integer> id = getById(exchange);
-
-                if (id.isPresent()) {
-
-                    try {
-                        Task task = manager.getTaskById(id.get());
-                        response = task.toString();
-                        sendSuccessText(exchange, response);
-                    } catch (TaskNotFoundException e) {
-                        sendNotFound(exchange);
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void processPost(HttpExchange exchange) throws IOException {
-
-            InputStream inputStream = exchange.getRequestBody();
-            String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
-
-            System.out.println(body);
-
-            Optional<Integer> id = getById(exchange);
-
-            if (id.isEmpty()) {
-                try {
-                    final Task task = gson.fromJson(body, Task.class);
-                    int idAdded = manager.addTask(task);
-                    System.out.println("Создали задачу id=" + idAdded);
-                    sendSuccessText(exchange, "Задача c id: " + idAdded + " создана");
-                } catch (TaskIntersectException e) {
-                    System.out.println("Задача пересекается с существующей");
-                    sendHasIntersections(exchange);
-                }
-            } else {
-                try {
-                    final Task task = gson.fromJson(body, Task.class);
-                    try {
-                        Task updatedTask = manager.updateTask(id.get(), task);
-                        System.out.println("Задача обновлена: " + updatedTask);
-                        sendSuccessText(exchange, "Задача успешно обновлена");
-                    } catch (TaskNotFoundException e) {
-                        System.out.println("Задача не найдена");
-                        sendNotFound(exchange);
-                    }
-                } catch (TaskIntersectException e) {
-                    System.out.println("Задача пересекается с существующей");
-                    sendHasIntersections(exchange);
-                }
-            }
-        }
-
-        @Override
-        protected void processDelete(HttpExchange exchange) throws IOException {
-            Optional<Integer> deletingId = getById(exchange);
-            deletingId.ifPresent(integer -> manager.removeTaskById(integer));
-            sendSuccessText(exchange, "Задача успешно удалена");
-        }
-    }
-
-    static class EpicsHandler extends BaseHttpHandler {
-
-        TaskManager manager;
-
-        public EpicsHandler(TaskManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        protected void processGet(HttpExchange exchange) throws IOException {
-            String response;
-
-            String[] splitStrings = getTaskIdFromURI(exchange);
-
-            if (splitStrings.length == 2) {
-                response = manager.getEpics().stream()
-                        .map(Epic::toString)
-                        .collect(Collectors.joining("\n"));
-
-                sendSuccessText(exchange, response);
-            }
-
-            if (splitStrings.length == 3) {
-                Optional<Integer> epicId = getById(exchange);
-
-                if (epicId.isPresent()) {
-
-                    try {
-                        Epic epic = manager.getEpicById(epicId.get());
-                        response = gson.toJson(epic);
-                        sendSuccessText(exchange, response);
-                    } catch (EpicNotFoundException e) {
-                        sendNotFound(exchange);
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void processPost(HttpExchange exchange) throws IOException {
-            InputStream inputStream = exchange.getRequestBody();
-            String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
-            Epic epic = gson.fromJson(body, Epic.class);
-            Optional<Integer> id = getById(exchange);
-
-            if (id.isPresent()) {
-                manager.addEpic(epic);
-                sendSuccessText(exchange, "Эпик успешно добавлен");
-            }
-        }
-
-        @Override
-        protected void processDelete(HttpExchange exchange) throws IOException {
-            Optional<Integer> deletingId = getById(exchange);
-            deletingId.ifPresent(integer -> manager.removeEpicById(integer));
-            sendSuccessText(exchange, "Эпик успешно удален");
-        }
-    }
-
-    static class SubtasksHandler extends BaseHttpHandler {
-
-        TaskManager manager;
-
-        public SubtasksHandler(TaskManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        protected void processGet(HttpExchange exchange) throws IOException {
-            String response;
-
-            String[] splitStrings = getTaskIdFromURI(exchange);
-
-            if (splitStrings.length == 2) {
-                response = manager.getSubtasks().stream()
-                        .map(Subtask::toString)
-                        .collect(Collectors.joining("\n"));
-                sendSuccessText(exchange, response);
-            }
-
-            if (splitStrings.length == 3) {
-                Optional<Integer> subtaskId = getById(exchange);
-                if (subtaskId.isPresent()) {
-
-                    try {
-                        Subtask subtask = manager.getSubtaskById(subtaskId.get());
-                        response = gson.toJson(subtask);
-                        sendSuccessText(exchange, response);
-                    } catch (SubtaskNotFoundException e) {
-                        sendNotFound(exchange);
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void processPost(HttpExchange exchange) throws IOException {
-            String[] splitStrings = getTaskIdFromURI(exchange);
-
-            InputStream inputStream = exchange.getRequestBody();
-            String body = new String(inputStream.readAllBytes(), DEFAULT_CHARSET);
-
-            if (splitStrings.length == 4) {
-                Optional<Integer> epicId = getById(exchange);
-
-                if (epicId.isPresent()) {
-
-                    Epic epic = manager.getEpicById(epicId.get());
-
-                    if (epic == null) {
-                        sendNotFound(exchange);
-                        return;
-                    }
-
-                    Optional<Integer> id = Optional.of(Integer.parseInt(splitStrings[3]));
-
-                    if (id.isEmpty()) {
-                        try {
-                            Subtask subtask = gson.fromJson(body, Subtask.class);
-                            int subtaskId = manager.addSubtaskToEpic(epicId.get(), subtask);
-                            System.out.println("Подзадача добавлена: " + subtaskId);
-                            sendSuccessText(exchange, "Подзадача c id: " + subtaskId + " добавлена");
-                        } catch (TaskIntersectException e) {
-                            System.out.println("Подзадача пересекается с существующей");
-                            sendHasIntersections(exchange);
-                        }
-                    } else {
-                        try {
-                            Subtask subtask = gson.fromJson(body, Subtask.class);
-                            Subtask subtaskId = manager.updateSubtask(epicId.get(), id.get(), subtask);
-                            System.out.println("Подзадача c id: " + subtaskId + " обновлена");
-                        } catch (TaskIntersectException e) {
-                            System.out.println("Подзадача пересекается с существующей");
-                            sendHasIntersections(exchange);
-                        }
-                    }
-                }
-            }
-        }
-
-        @Override
-        protected void processDelete(HttpExchange exchange) throws IOException {
-            String[] splitStrings = getTaskIdFromURI(exchange);
-
-            Optional<Integer> epicId = getById(exchange);
-            if (epicId.isPresent()) {
-                Optional<Integer> subtaskId = Optional.of(Integer.parseInt(splitStrings[3]));
-                if (subtaskId.isPresent()) {
-                    manager.removeSubtaskById(epicId.get(), subtaskId.get());
-                    sendSuccessText(exchange, "Подзадача успешно удалена");
-                }
-            }
-        }
-    }
-
-    static class HistoryHandler extends BaseHttpHandler {
-
-        TaskManager manager;
-
-        public HistoryHandler(TaskManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        protected void processGet(HttpExchange exchange) throws IOException {
-            String response = manager.getHistory().stream()
-                    .map(Task::toString)
-                    .collect(Collectors.joining("\n"));
-            sendSuccessText(exchange, response);
-        }
-    }
-
-    static class PrioritizedTasksHandler extends BaseHttpHandler {
-
-        TaskManager manager;
-
-        public PrioritizedTasksHandler(TaskManager manager) {
-            this.manager = manager;
-        }
-
-        @Override
-        protected void processGet(HttpExchange exchange) throws IOException {
-            String response = manager.getPrioritizedTasks().stream()
-                    .map(Task::toString)
-                    .collect(Collectors.joining("\n"));
-            sendSuccessText(exchange, response);
-        }
-    }
-
-    private static Optional<Integer> getById(HttpExchange exchange) {
-        String[] pathParts = exchange.getRequestURI().getPath().split("/");
-
-        try {
-            if (pathParts.length == 3) {
-                return Optional.of(Integer.parseInt(pathParts[2]));
-            } else {
-                return Optional.empty();
-            }
-        } catch (NumberFormatException exception) {
-            return Optional.empty();
-        }
     }
 }

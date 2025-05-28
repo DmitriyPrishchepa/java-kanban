@@ -1,13 +1,23 @@
 package handlers;
 
+import adapters.DateTimeAdapter;
+import adapters.DurationAdapter;
+import adapters.EnumAdapter;
+import adapters.StringIntAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import util.TaskProgress;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class BaseHttpHandler implements HttpHandler {
 
@@ -104,5 +114,30 @@ public class BaseHttpHandler implements HttpHandler {
         URI requestURI = exchange.getRequestURI();
         String path = requestURI.getPath();
         return path.split("/");
+    }
+
+    public Optional<Integer> getById(HttpExchange exchange) {
+        String[] pathParts = exchange.getRequestURI().getPath().split("/");
+
+        try {
+            if (pathParts.length == 3) {
+                return Optional.of(Integer.parseInt(pathParts[2]));
+            } else {
+                return Optional.empty();
+            }
+        } catch (NumberFormatException exception) {
+            return Optional.empty();
+        }
+    }
+
+    public Gson getGsonBuilder() {
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .serializeNulls()
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .registerTypeAdapter(LocalDateTime.class, new DateTimeAdapter())
+                .registerTypeAdapter(TaskProgress.class, new EnumAdapter())
+                .registerTypeAdapter(Integer.class, new StringIntAdapter())
+                .create();
     }
 }
