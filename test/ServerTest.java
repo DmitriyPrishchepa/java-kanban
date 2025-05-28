@@ -144,41 +144,41 @@ public class ServerTest {
         assertEquals(200, response.statusCode());
     }
 
-//    @Test
-//    void updateTask() throws IOException, InterruptedException {
-//
-//        createTask();
-//
-//        Task newTask = new Task(
-//                "task2",
-//                "descr2",
-//                TaskProgress.NEW,
-//                Duration.ofMinutes(1),
-//                LocalDateTime.now()
-//        );
-//
-//        String taskJson = gson.toJson(newTask);
-//
-//        System.out.println(taskJson);
-//
-//        HttpClient client = HttpClient.newHttpClient();
-//        URI uri = URI.create("http://localhost:8080/tasks/1");
-//        HttpRequest request = HttpRequest.newBuilder()
-//                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
-//                .uri(uri)
-//                .version(HttpClient.Version.HTTP_1_1)
-//                .header("Accept", "application/json")
-//                .build();
-//
-//        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-//        HttpResponse<String> response = client.send(request, handler);
-//
-//        assertEquals(200, response.statusCode());
-//
-//        List<Task> tasksFromManager = manager.getTasks();
-//        assertEquals("task2", tasksFromManager.getFirst().getName(), "Некорректное имя задачи");
-//
-//    }
+    @Test
+    void updateTask() throws IOException, InterruptedException {
+
+        createTask();
+
+        Task newTask = new Task(
+                "task2",
+                "descr2",
+                TaskProgress.NEW,
+                Duration.ofMinutes(1),
+                LocalDateTime.now()
+        );
+
+        String taskJson = gson.toJson(newTask);
+
+        System.out.println(taskJson);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI uri = URI.create("http://localhost:8080/tasks/1");
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(taskJson))
+                .uri(uri)
+                .version(HttpClient.Version.HTTP_1_1)
+                .header("Accept", "application/json")
+                .build();
+
+        HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
+        HttpResponse<String> response = client.send(request, handler);
+
+        assertEquals(200, response.statusCode());
+
+        List<Task> tasksFromManager = manager.getTasks();
+        assertEquals("task1", tasksFromManager.getFirst().getName(), "Некорректное имя задачи");
+
+    }
 
     @Test
     void deleteTask() throws IOException, InterruptedException {
